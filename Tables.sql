@@ -1,13 +1,14 @@
 use THY;
 
-DROP TABLE IF EXISTS Payment;
 DROP TABLE IF EXISTS Ticket;
+DROP TABLE IF EXISTS Payment;
 DROP TABLE IF EXISTS FlightSeat;
 DROP TABLE IF EXISTS Seat;
 DROP TABLE IF EXISTS Flight;
 DROP TABLE IF EXISTS Plane;
 DROP TABLE IF EXISTS Airport;
 DROP TABLE IF EXISTS `User`;
+DROP TABLE IF EXISTS CreditCard;
 
 -- 1) USER
 CREATE TABLE `User` (
@@ -19,6 +20,7 @@ CREATE TABLE `User` (
     gender        ENUM('F','M','O') NOT NULL,
     nationality   VARCHAR(50)  NULL,
     email         VARCHAR(100) NOT NULL UNIQUE,
+    password      CHAR(8) NOT NULL,
     phone_num     VARCHAR(15)  NOT NULL UNIQUE,
     user_type     ENUM('customer','admin') NOT NULL DEFAULT 'customer',
     mile          INT NOT NULL DEFAULT 0,
@@ -182,4 +184,23 @@ CREATE TABLE Ticket (
         ON DELETE RESTRICT,
         
     UNIQUE (flight_id, seat_number)
+);
+
+-- 9) CREDIT CARD
+CREATE TABLE CreditCard(
+	user_id     BIGINT UNSIGNED  NOT NULL,
+    card_num    CHAR(16)  NOT NULL,
+    CVV  CHAR(3) NOT NULL,
+    expiry_time  CHAR(5) NOT NULL,
+    holder_name  VARCHAR(100) NOT NULL,
+    
+    PRIMARY KEY (user_id, card_num),
+    CONSTRAINT user_card 
+		FOREIGN KEY (user_id) REFERENCES User(user_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+        
+	CONSTRAINT card_number_domain CHECK (card_number REGEXP '^[0-9]{16}$'),
+    CONSTRAINT cvv_domain CHECK (cvv REGEXP '^[0-9]{3}$'),
+    CONSTRAINT expr_domain CHECK (expiry_time REGEXP '^(0[1-9]|1[0-2])/[0-9]{2}$')
 );
