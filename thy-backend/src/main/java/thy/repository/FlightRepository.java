@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.util.List;
 
 public interface FlightRepository extends JpaRepository<Flight, Long> {
@@ -26,11 +25,12 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
         FROM Flight f
         WHERE f.originAirport.iataCode = :origin
           AND f.destinationAirport.iataCode = :destination
-          AND DATE(f.departureTime) = :date
+          AND f.departureTime BETWEEN :start AND :end
         """)
     List<Flight> searchFlights(
             @Param("origin") String origin,
             @Param("destination") String destination,
-            @Param("date") LocalDate date
+            @Param("date") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 }
