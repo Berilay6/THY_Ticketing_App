@@ -9,5 +9,5 @@ import thy.repository.CreditCardRepository;
 @RequiredArgsConstructor
 public class CreditCardService {
     
-    public final CreditCardRepository creditCardRepository;
+    private final CreditCardRepository creditCardRepository;
 }

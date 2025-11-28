@@ -9,5 +9,5 @@ import thy.repository.PaymentRepository;
 @RequiredArgsConstructor
 public class PaymentService {
     
-    public final PaymentRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
 }

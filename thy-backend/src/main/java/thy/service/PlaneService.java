@@ -9,5 +9,5 @@ import thy.repository.PlaneRepository;
 @RequiredArgsConstructor
 public class PlaneService {
     
-    public final PlaneRepository planeRepository;
+    private final PlaneRepository planeRepository;
 }

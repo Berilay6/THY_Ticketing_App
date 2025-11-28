@@ -9,5 +9,5 @@ import thy.repository.FlightRepository;
 @RequiredArgsConstructor
 public class FlightService {
     
-    public final FlightRepository flightRepository;
+    private final FlightRepository flightRepository;
 }

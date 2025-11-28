@@ -9,5 +9,5 @@ import thy.repository.SeatRepository;
 @RequiredArgsConstructor
 public class SeatService {
     
-    public final SeatRepository seatRepository;
+    private final SeatRepository seatRepository;
 }

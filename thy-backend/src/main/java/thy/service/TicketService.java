@@ -9,5 +9,5 @@ import thy.repository.TicketRepository;
 @RequiredArgsConstructor
 public class TicketService {
     
-    public final TicketRepository ticketRepository;
+    private final TicketRepository ticketRepository;
 }
