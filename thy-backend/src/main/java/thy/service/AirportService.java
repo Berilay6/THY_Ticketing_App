@@ -3,11 +3,11 @@ package thy.service;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import thy.repository.UserRepository;
+import thy.repository.AirportRepository;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class AirportService {
 
-    private final UserRepository userRepository;
+    private final AirportRepository airportRepository;
 }
