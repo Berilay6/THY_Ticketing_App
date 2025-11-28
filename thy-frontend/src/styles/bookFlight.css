@@ -1,0 +1,37 @@
+.book-wrapper {
+  max-width: 720px;
+}
+
+.book-search-card {
+  margin-bottom: 1.5rem;
+}
+
+.book-results-header {
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.book-flight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.book-flight-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.book-flight-info-main {
+  font-weight: 500;
+}
+
+.book-flight-info-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.book-flight-price {
+  margin-top: 0.4rem;
+}

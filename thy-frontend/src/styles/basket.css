@@ -1,0 +1,20 @@
+.basket-wrapper {
+  max-width: 720px;
+}
+
+.basket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.basket-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.basket-summary {
+  max-width: 360px;
+}

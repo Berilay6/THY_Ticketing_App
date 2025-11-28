@@ -1,0 +1,23 @@
+.myflights-wrapper {
+  max-width: 720px;
+}
+
+.myflights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.myflights-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.myflights-status-chip {
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}

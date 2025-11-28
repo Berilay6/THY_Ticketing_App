@@ -1,0 +1,49 @@
+.app-root {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-default);
+}
+
+/* Sol menü */
+.app-sidebar {
+  width: 260px;
+  border-right: 1px solid var(--border-subtle);
+  background-color: var(--bg-paper);
+  padding-top: 64px; /* AppBar yüksekliği kadar boşluk */
+}
+
+/* Menü listesi */
+.sidebar-list {
+  padding: 0.5rem;
+}
+
+/* React Router NavLink aktive olduğunda */
+.sidebar-link-active {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-link-active .MuiListItemIcon-root {
+  color: #ffffff;
+}
+
+/* Ana içerik */
+.app-main {
+  flex-grow: 1;
+  margin-left: 260px;
+}
+
+/* Üst bar */
+.app-appbar {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-paper) !important;
+  color: inherit !important;
+}
+
+/* İçerik alanı */
+.app-content {
+  padding: 2rem;
+  padding-top: 80px;
+}

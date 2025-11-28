@@ -1,0 +1,22 @@
+.home-header {
+  margin-bottom: 1rem;
+}
+
+.home-subtitle {
+  max-width: 520px;
+  margin-bottom: 2rem;
+  color: var(--text-muted);
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  max-width: 960px;
+}
+
+@media (min-width: 900px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
