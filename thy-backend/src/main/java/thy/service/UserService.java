@@ -5,8 +5,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import thy.dto.CreditCardRequestDTO;
-import thy.dto.UserResultDTO;
-import thy.dto.UserUpdateDTO;
+import thy.dto.UserDTO;
 import thy.entity.CreditCard;
 import thy.entity.User;
 import thy.entity.User.Gender;
@@ -19,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CreditCardService creditCardService;
 
-    public UserResultDTO getUserByEmailOrPhoneNum(String emailOrPhoneNum) {
+    public UserDTO getUserByEmailOrPhoneNum(String emailOrPhoneNum) {
 
         return userRepository.findByEmailOrPhoneNum(emailOrPhoneNum, emailOrPhoneNum)   // either email or phone number
             .map(this::convertToUserDTO)
@@ -27,7 +26,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResultDTO updateUser(UserUpdateDTO userDTO) {
+    public UserDTO updateUser(UserDTO userDTO) {
 
         User user = userRepository.findById(userDTO.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -47,7 +46,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResultDTO deleteUser(Long userId) {
+    public UserDTO deleteUser(Long userId) {
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -92,8 +91,8 @@ public class UserService {
         creditCardService.deleteCreditCard(creditCard);
     }
 
-    private UserResultDTO convertToUserDTO(User user) {
-        return new UserResultDTO(
+    private UserDTO convertToUserDTO(User user) {
+        return new UserDTO(
             user.getUserId(),
             user.getFirstName(),
             user.getMiddleName(),
