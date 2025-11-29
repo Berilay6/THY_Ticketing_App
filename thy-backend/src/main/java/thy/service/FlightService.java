@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import thy.dto.FlightSearchRequestDTO;
 import thy.dto.FlightSearchResultDTO;
+import thy.entity.Flight;
 import thy.repository.FlightRepository;
 
 @Service
@@ -27,17 +28,19 @@ public class FlightService {
             flightSearchRequestDTO.getDestination(),
             startOfDay,
             endOfDay
-            ).stream()
-            .map(flight -> new FlightSearchResultDTO(
-                flight.getFlightId(),
-                flight.getOriginAirport().getIataCode(),
-                flight.getDestinationAirport().getIataCode(),
-                flight.getOriginAirport().getName(),
-                flight.getDestinationAirport().getName(),
-                flight.getDepartureTime(),
-                flight.getArrivalTime(),
-                flight.getPlane().getModelType()
-            )).toList();
+            ).stream().map(this::convertToFlightSearchResultDTO).toList();
     }
-    
+
+    private FlightSearchResultDTO convertToFlightSearchResultDTO(Flight flight) {
+        return new FlightSearchResultDTO(
+            flight.getFlightId(),
+            flight.getOriginAirport().getIataCode(),
+            flight.getDestinationAirport().getIataCode(),
+            flight.getOriginAirport().getName(),
+            flight.getDestinationAirport().getName(),
+            flight.getDepartureTime(),
+            flight.getArrivalTime(),
+            flight.getPlane().getModelType()
+        );
+    }
 }

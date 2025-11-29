@@ -57,6 +57,7 @@ public class Ticket {
     })
     private FlightSeat flightSeat;
 
-
-
+    @ManyToOne
+    @JoinColumn(name = "flight_id", insertable = false, updatable = false)
+    private Flight flight;
 }

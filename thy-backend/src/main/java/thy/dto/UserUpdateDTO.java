@@ -1,5 +1,7 @@
 package thy.dto;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,14 +9,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class UserUpdateDTO {
 
-	//password, phone_num gibi alanları özellikle dışarıya açmıyoruz.
     private Long userId;
     private String firstName;
+    private String middleName;
     private String lastName;
-    private String email;
+    private LocalDate dateOfBirth;
+    private String gender;          // "M" / "F" / "O"
     private String nationality;
-    private Integer mile;
-    private String userType; // "customer" / "admin"
+    private String email;
+    //private String password;
+    private String phoneNum;
 }
