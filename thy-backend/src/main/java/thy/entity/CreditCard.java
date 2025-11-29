@@ -14,10 +14,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreditCard {
-
-    @Id
-    @Column(name = "user_id")
-    private Long userId;
+	
+	 @Id
+	 @Column(name = "user_id")
+	 private Long userId;
 
     @Id
     @Column(name = "card_num", length = 16)
@@ -33,7 +33,7 @@ public class CreditCard {
     private String holderName;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false, nullable = false)
     private User user;
 
 }

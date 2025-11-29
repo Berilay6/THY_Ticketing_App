@@ -1,8 +1,31 @@
 import { Box, Typography, Paper } from "@mui/material";
-import { useBooking } from "../context/BookingContext";
+import { useState, useEffect } from "react";
+import { paymentApi } from "../api/apiClient";
 
 export default function PaymentsHistoryPage() {
-  const { payments } = useBooking();
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    if (userId) {
+      loadPayments();
+    }
+  }, [userId]);
+
+  const loadPayments = () => {
+    setLoading(true);
+    paymentApi
+      .getUserPayments(userId)
+      .then((data) => {
+        setPayments(data || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load payments:", err);
+        setPayments([]);
+      })
+      .finally(() => setLoading(false));
+  };
 
   return (
     <Box className="page-root">
@@ -10,18 +33,22 @@ export default function PaymentsHistoryPage() {
         Payments
       </Typography>
 
-      {payments.length === 0 ? (
+      {loading ? (
+        <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
+          Loading payments...
+        </Typography>
+      ) : payments.length === 0 ? (
         <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
           You don’t have any payments yet.
         </Typography>
       ) : (
         payments.map((p) => (
-          <Paper key={p.id} elevation={0} className="card">
+          <Paper key={p.paymentId} elevation={0} className="card">
             <Typography sx={{ fontWeight: 500 }}>
-              {p.amount} TL • {p.date.slice(0, 10)} {p.date.slice(11, 16)}
+              {p.totalAmount} {p.currency} • {p.method}
             </Typography>
             <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
-              Flights: {p.flights}
+              Tickets: {p.tickets?.length || 0}
             </Typography>
           </Paper>
         ))

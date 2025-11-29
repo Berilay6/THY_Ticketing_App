@@ -1,26 +1,40 @@
 package thy.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.*;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import thy.dto.FlightSearchRequestDTO;
 import thy.dto.FlightSearchResultDTO;
+import thy.dto.SeatDTO;
+import thy.service.FlightSeatService;
 import thy.service.FlightService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/flights")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") // Vite dev server
 public class FlightController {
 
     private final FlightService flightService;
+    private final FlightSeatService flightSeatService;
 
     @PostMapping("/search")
-    public List<FlightSearchResultDTO> searchFlights(
-            @RequestBody FlightSearchRequestDTO request
-    ) {
-        return flightService.searchFlights(request);
+    public ResponseEntity<List<FlightSearchResultDTO>> searchFlights(@RequestBody FlightSearchRequestDTO req) {
+        List<FlightSearchResultDTO> flights = flightService.searchFlights(req);
+        return ResponseEntity.ok(flights);
+    }
+
+    @GetMapping("/{flightId}/seats")
+    public ResponseEntity<List<SeatDTO>> getFlightSeats(@PathVariable Long flightId) {
+        List<SeatDTO> seats = flightSeatService.getFlightSeats(flightId);
+        return ResponseEntity.ok(seats);
+    }
+
+    @GetMapping("/{flightId}/seats/{seatNumber}")
+    public ResponseEntity<SeatDTO> getSeatStatus(@PathVariable Long flightId, @PathVariable String seatNumber) {
+        SeatDTO seat = flightSeatService.getFlightSeatStatus(flightId, seatNumber);
+        if (seat == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(seat);
     }
 }

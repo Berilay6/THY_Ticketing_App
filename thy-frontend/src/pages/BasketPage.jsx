@@ -10,6 +10,18 @@ export default function BasketPage() {
 
   const total = basket.reduce((sum, f) => sum + (f.price || 0), 0);
 
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "";
+    const dt = new Date(dateTimeStr);
+    return dt.toLocaleString("tr-TR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <Box className="page-root basket-wrapper">
       <Typography variant="h5" gutterBottom>
@@ -24,20 +36,28 @@ export default function BasketPage() {
         <>
           <div className="basket-list">
             {basket.map((f) => (
-              <Paper key={f.id} elevation={0} className="card basket-item">
+              <Paper
+                key={f.flightId ?? f.id}
+                elevation={0}
+                className="card basket-item"
+              >
                 <Box>
-                  <Typography sx={{ fontWeight: 500 }}>{f.code}</Typography>
+                  <Typography sx={{ fontWeight: 500 }}>
+                    {f.origin} → {f.destination}
+                  </Typography>
                   <Typography
                     variant="body2"
                     sx={{ color: "var(--text-muted)" }}
                   >
-                    {f.route} • {f.date} • {f.time}
+                    {formatDateTime(f.departureTime)}
                   </Typography>
                   <Typography variant="body2" sx={{ marginTop: "0.25rem" }}>
                     {f.price} TL
                   </Typography>
                 </Box>
-                <IconButton onClick={() => removeFromBasket(f.id)}>
+                <IconButton
+                  onClick={() => removeFromBasket(f.flightId ?? f.id)}
+                >
                   <DeleteOutlineIcon />
                 </IconButton>
               </Paper>

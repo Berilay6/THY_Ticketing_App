@@ -1,15 +1,24 @@
 import { Box, Typography, Paper, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import "../styles/home.css";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [greeting, setGreeting] = useState("Welcome");
+
+  useEffect(() => {
+    const firstName = localStorage.getItem("userFirstName");
+    if (firstName) {
+      setGreeting(`Welcome back, ${firstName}`);
+    }
+  }, []);
 
   return (
     <Box className="page-root">
       <div className="home-header">
         <Typography variant="h4" gutterBottom>
-          Welcome back, Cemre
+          {greeting}
         </Typography>
         <Typography className="home-subtitle" variant="body1">
           Manage your THY flights, bookings and payments from a single, clean

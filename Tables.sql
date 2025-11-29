@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS Seat;
 DROP TABLE IF EXISTS Flight;
 DROP TABLE IF EXISTS Plane;
 DROP TABLE IF EXISTS Airport;
-DROP TABLE IF EXISTS CreditCard;
 DROP TABLE IF EXISTS `User`;
+DROP TABLE IF EXISTS CreditCard;
 
 -- 1) USER
 CREATE TABLE `User` (
@@ -73,7 +73,6 @@ CREATE TABLE Flight (
     arrival_time           TIMESTAMP       NOT NULL,
     flight_duration_min    INT UNSIGNED NULL,
     plane_id               BIGINT UNSIGNED NOT NULL,
-    price				   DECIMAL(10,2)  NOT NULL,
     
     PRIMARY KEY (flight_id),
     CONSTRAINT flight_origin_airport
@@ -98,7 +97,7 @@ CREATE TABLE Flight (
 
 -- 5) SEAT
 -- Plane – Seat : 1–N
--- (plane_id, seat_number) composite key
+-- (plane_id, seat_number) candidate key
 CREATE TABLE Seat (
     plane_id    BIGINT UNSIGNED NOT NULL,
     seat_number VARCHAR(3)      NOT NULL,
@@ -135,6 +134,7 @@ CREATE TABLE FlightSeat (
 
 -- 7) PAYMENT
 -- Payment – User   : N–1
+-- Payment – Ticket : 1–N
 CREATE TABLE Payment (
     payment_id   BIGINT UNSIGNED AUTO_INCREMENT,
     user_id      BIGINT UNSIGNED NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE Payment (
 
 -- 8) TICKET
 -- Ticket – FlightSeat : 1–1
--- Payment – Ticket : 1–N
+-- Ticket – Flight    : N–1 (FlightSeat üzerinden de bağlı)
 CREATE TABLE Ticket (
     ticket_id          BIGINT UNSIGNED AUTO_INCREMENT,
     payment_id    	   BIGINT UNSIGNED NOT NULL,
@@ -186,7 +186,6 @@ CREATE TABLE Ticket (
     UNIQUE (flight_id, seat_number)
 );
 
--- User - CreaditCard : 1:N
 -- 9) CREDIT CARD
 CREATE TABLE CreditCard(
 	user_id     BIGINT UNSIGNED  NOT NULL,

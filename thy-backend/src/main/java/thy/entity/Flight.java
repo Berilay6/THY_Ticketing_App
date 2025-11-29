@@ -29,9 +29,6 @@ public class Flight {
 
     @Column(name = "flight_duration_min")
     private Integer flightDurationMin;
-
-    @Column(name = "price")
-    private BigDecimal price;
     
     @ManyToOne
     @JoinColumn(name = "origin_airport_id", nullable = false)
@@ -45,5 +42,7 @@ public class Flight {
     @JoinColumn(name = "plane_id", nullable = false)
     private Plane plane;
 
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
 }

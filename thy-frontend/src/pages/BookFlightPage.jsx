@@ -1,6 +1,3 @@
-// src/pages/BookFlightPage.jsx
-import "../styles/bookFlight.css";
-
 import {
   Box,
   Typography,
@@ -12,59 +9,43 @@ import {
 import { useState } from "react";
 import { useBooking } from "../context/BookingContext";
 import { useNavigate } from "react-router-dom";
-import flightService from "../services/flightService";
+import { flightApi } from "../api/apiClient";
+import "../styles/bookFlight.css";
 
 export default function BookFlightPage() {
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const { addToBasket } = useBooking();
   const navigate = useNavigate();
 
-  const formatDateTime = (dt) => {
-    if (!dt) return { date: "", time: "" };
-    const s = typeof dt === "string" ? dt : dt.toString();
-    const parts = s.includes("T") ? s.split("T") : s.split(" ");
-    const datePart = parts[0] || "";
-    const timePart = (parts[1] || "").slice(0, 5);
-    return { date: datePart, time: timePart };
-  };
   const handleSearch = () => {
-    setLoading(true);
-    setError("");
+    if (!from || !to || !date) return;
 
-    flightService
-      .searchFlights({ origin, destination, date })
-      .then((data) => {
-        setResults(data || []);
+    setLoading(true);
+    const req = {
+      origin: from,
+      destination: to,
+      date: date,
+    };
+    flightApi
+      .searchFlights(req)
+      .then((flights) => {
+        setResults(flights || []);
       })
       .catch((err) => {
-        console.error(err);
-        setError("Flights could not be loaded. Please try again.");
+        console.error("Flight search failed:", err);
+        setResults([]);
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   };
 
   const handleAddToBasket = (flight) => {
-    // FlightSearchResultDTO → basket formatına çeviriyoruz
-    // Backend DTO alan adları: origin, destination, originAirportName, destinationAirportName, departureTime
-    const { date: fDate, time: fTime } = formatDateTime(flight.departureTime);
-
-    addToBasket({
-      id: flight.flightId,
-      code: `${flight.origin}-${flight.destination}`,
-      route: `${flight.origin} → ${flight.destination}`,
-      date: fDate,
-      time: fTime,
-      price: flight.price || 1500,
-      raw: flight,
-    });
+    // İleride burada seat selection adımı eklenebilir
+    addToBasket(flight);
   };
 
   return (
@@ -78,16 +59,16 @@ export default function BookFlightPage() {
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
               label="From"
-              placeholder="IST"
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
+              placeholder="Istanbul (IST)"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
               fullWidth
             />
             <TextField
               label="To"
-              placeholder="ESB"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              placeholder="Ankara (ESB)"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
               fullWidth
             />
           </Stack>
@@ -105,16 +86,10 @@ export default function BookFlightPage() {
             variant="contained"
             size="large"
             onClick={handleSearch}
-            disabled={!origin || !destination || !date || loading}
+            disabled={!from || !to || !date || loading}
           >
             {loading ? "Searching..." : "Search flights"}
           </Button>
-
-          {error && (
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          )}
         </Stack>
       </Paper>
 
@@ -125,43 +100,35 @@ export default function BookFlightPage() {
           </Typography>
 
           <div className="book-flight-list">
-            {results.map((flight) => {
-              const { date: fDate, time: fTime } = formatDateTime(
-                flight.departureTime
-              );
-
-              return (
-                <Paper
-                  key={flight.flightId}
-                  elevation={0}
-                  className="card book-flight-item"
-                >
-                  <Box>
-                    <div className="book-flight-info-main">
-                      {flight.origin} → {flight.destination}
-                    </div>
-                    <div className="book-flight-info-sub">
-                      {flight.originAirportName} →{" "}
-                      {flight.destinationAirportName} • {fDate} {fTime}
-                    </div>
-                    <div className="book-flight-price">
-                      <strong>
-                        {(flight.price || 1500).toLocaleString()} TL
-                      </strong>
-                    </div>
-                  </Box>
-                  <Stack spacing={1} alignItems="flex-end">
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleAddToBasket(flight)}
-                    >
-                      Select & add to basket
-                    </Button>
-                  </Stack>
-                </Paper>
-              );
-            })}
+            {results.map((flight) => (
+              <Paper
+                key={flight.flightId}
+                elevation={0}
+                className="card book-flight-item"
+              >
+                <Box>
+                  <div className="book-flight-info-main">
+                    {flight.flightCode}
+                  </div>
+                  <div className="book-flight-info-sub">
+                    {flight.origin} → {flight.destination} •{" "}
+                    {flight.departureTime}
+                  </div>
+                  <div className="book-flight-price">
+                    <strong>{flight.price?.toFixed(2)} TL</strong>
+                  </div>
+                </Box>
+                <Stack spacing={1} alignItems="flex-end">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => addToBasket(flight)}
+                  >
+                    Select & add to basket
+                  </Button>
+                </Stack>
+              </Paper>
+            ))}
             <Button
               size="small"
               variant="text"

@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { NavLink, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -46,6 +47,14 @@ const menuItems = [
 ];
 
 export default function UserLayout() {
+  const [greeting, setGreeting] = useState("Hello");
+
+  useEffect(() => {
+    const firstName = localStorage.getItem("userFirstName");
+    if (firstName) {
+      setGreeting(`Hello, ${firstName}`);
+    }
+  }, []);
   return (
     <Box className="app-root">
       <Drawer
@@ -78,7 +87,7 @@ export default function UserLayout() {
               <Typography variant="h6">THY Ticketing</Typography>
             </Box>
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
-              Hello, Cemre
+              {greeting}
             </Typography>
           </Toolbar>
         </AppBar>

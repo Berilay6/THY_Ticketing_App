@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "`User`") 
@@ -64,4 +66,11 @@ public class User {
 
     @Column(name = "mile", nullable = false)
     private Integer mile = 0;
+
+
+    // spring.jpa.hibernate.ddl-auto=update 
+    // this setting will automatically create the join table for many-to-many relationship
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    private List<CreditCard> creditCards = new ArrayList<>();
 }

@@ -20,5 +20,5 @@ public class FlightSearchResultDTO {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String planeModel;    // Plane.modelType mesela: "Boeing 737-800"
-    private BigDecimal price;
+    private BigDecimal price;    // Uçuş fiyatı
 }
