@@ -33,15 +33,31 @@ public class UserService {
         User user = userRepository.findById(userDTO.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setFirstName(userDTO.getFirstName());
-        user.setMiddleName(userDTO.getMiddleName());
-        user.setLastName(userDTO.getLastName());
-        user.setDateOfBirth(userDTO.getDateOfBirth());
-        user.setGender(Gender.valueOf(userDTO.getGender()));
-        user.setNationality(userDTO.getNationality());
-        user.setEmail(userDTO.getEmail());
-        //user.setPassword(userDTO.getPassword());
-        user.setPhoneNum(userDTO.getPhoneNum());
+        // Only update non-null fields
+        if (userDTO.getFirstName() != null) {
+            user.setFirstName(userDTO.getFirstName());
+        }
+        if (userDTO.getMiddleName() != null) {
+            user.setMiddleName(userDTO.getMiddleName());
+        }
+        if (userDTO.getLastName() != null) {
+            user.setLastName(userDTO.getLastName());
+        }
+        if (userDTO.getDateOfBirth() != null) {
+            user.setDateOfBirth(userDTO.getDateOfBirth());
+        }
+        if (userDTO.getGender() != null) {
+            user.setGender(Gender.valueOf(userDTO.getGender()));
+        }
+        if (userDTO.getNationality() != null) {
+            user.setNationality(userDTO.getNationality());
+        }
+        if (userDTO.getEmail() != null) {
+            user.setEmail(userDTO.getEmail());
+        }
+        if (userDTO.getPhoneNum() != null) {
+            user.setPhoneNum(userDTO.getPhoneNum());
+        }
 
         User updatedUser = userRepository.save(user);
         return convertToUserDTO(updatedUser);

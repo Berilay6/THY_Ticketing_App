@@ -57,15 +57,27 @@ export default function UserLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    const name = localStorage.getItem("userName");
+    const updateUserName = () => {
+      const token = localStorage.getItem("authToken");
+      const name = localStorage.getItem("userName");
 
-    if (token && name) {
-      setUserName(name);
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+      if (token && name) {
+        setUserName(name);
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    // Initial load
+    updateUserName();
+
+    // Listen for user updates
+    window.addEventListener("userUpdate", updateUserName);
+
+    return () => {
+      window.removeEventListener("userUpdate", updateUserName);
+    };
   }, []);
 
   const handleMenuOpen = (event) => {

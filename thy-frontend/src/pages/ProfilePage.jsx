@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { userApi } from "../api/apiClient";
 
 export default function ProfilePage() {
@@ -26,6 +27,8 @@ export default function ProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   const userId = localStorage.getItem("userId");
+  const initialEmail = localStorage.getItem("userEmail");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (userId) {
@@ -54,6 +57,7 @@ export default function ProfilePage() {
     if (!userId) return;
 
     setLoading(true);
+    const emailChanged = email !== initialEmail;
     const updateData = {
       userId,
       firstName,
@@ -64,9 +68,24 @@ export default function ProfilePage() {
     userApi
       .update(userId, updateData)
       .then(() => {
-        localStorage.setItem("userFirstName", firstName);
+        localStorage.setItem("userName", `${firstName} ${lastName}`);
         localStorage.setItem("userEmail", email);
-        alert("Profile updated successfully!");
+
+        if (emailChanged) {
+          // Email changed - token is invalid, need to re-login
+          alert(
+            "Email updated successfully! Please login again with your new email."
+          );
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("userEmail");
+          localStorage.removeItem("userName");
+          navigate("/login");
+        } else {
+          alert("Profile updated successfully!");
+          // Trigger custom event to update other components
+          window.dispatchEvent(new CustomEvent("userUpdate"));
+        }
       })
       .catch((err) => {
         console.error("Failed to update profile:", err);

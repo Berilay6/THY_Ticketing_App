@@ -8,11 +8,25 @@ export default function HomePage() {
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
-    const userName = localStorage.getItem("userName");
-    if (userName) {
-      const firstName = userName.split(" ")[0];
-      setGreeting(`Welcome, ${firstName}`);
-    }
+    const updateGreeting = () => {
+      const userName = localStorage.getItem("userName");
+      if (userName) {
+        const firstName = userName.split(" ")[0];
+        setGreeting(`Welcome, ${firstName}`);
+      } else {
+        setGreeting("Welcome");
+      }
+    };
+
+    // Initial load
+    updateGreeting();
+
+    // Listen for user updates
+    window.addEventListener("userUpdate", updateGreeting);
+
+    return () => {
+      window.removeEventListener("userUpdate", updateGreeting);
+    };
   }, []);
 
   return (
