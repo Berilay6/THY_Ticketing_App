@@ -45,16 +45,12 @@ public class CreditCardService {
     private CreditCardResultDTO convertToCreditCardResultDTO(CreditCard creditCard) {
         String cardNum = creditCard.getCardNum();
         String cardNumLast4digit = cardNum.substring(cardNum.length() - 4);
-        
-        String holderName = creditCard.getHolderName();
-        String[] nameParts = holderName.split(" ");
-        StringBuilder holderNameInit = new StringBuilder();
-        for (String part : nameParts) {
-            if (!part.isEmpty()) {
-                holderNameInit.append(part.charAt(0)).append(".");
-            }
-        }
 
-        return new CreditCardResultDTO(cardNumLast4digit, holderNameInit.toString());
+        return new CreditCardResultDTO(
+            creditCard.getCardId(),
+            cardNumLast4digit,
+            creditCard.getHolderName(),
+            creditCard.getExpiryTime()
+        );
     }
 }

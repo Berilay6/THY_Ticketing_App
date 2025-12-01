@@ -5,22 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "CreditCard")
-@IdClass(CreditCardId.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreditCard {
 	
-	 @Id
-	 @Column(name = "user_id")
-	 private Long userId;
-
     @Id
-    @Column(name = "card_num", length = 16)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "card_id")
+    private Long cardId;
+
+    @Column(name = "card_num", nullable = false, length = 16, unique = true)
     private String cardNum;
 
     @Column(name = "CVV", nullable = false, length = 3)
@@ -32,8 +33,7 @@ public class CreditCard {
     @Column(name = "holder_name", nullable = false, length = 100)
     private String holderName;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false, nullable = false)
-    private User user;
+    @ManyToMany(mappedBy = "creditCards")
+    private List<User> users = new ArrayList<>();
 
 }

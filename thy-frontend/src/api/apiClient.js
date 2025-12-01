@@ -76,11 +76,10 @@ export const userApi = {
       method: "POST",
       body: JSON.stringify(card),
     }),
-  deleteCreditCard: (userId, cardNum) =>
-    fetchJson(
-      `${endpoints.users.creditCards(userId)}/${encodeURIComponent(cardNum)}`,
-      { method: "DELETE" }
-    ),
+  deleteCreditCard: (userId, cardId) =>
+    fetchJson(`${endpoints.users.creditCards(userId)}/${cardId}`, {
+      method: "DELETE",
+    }),
   changePassword: (userId, passwordData) =>
     fetchJson(endpoints.users.changePassword(userId), {
       method: "PUT",

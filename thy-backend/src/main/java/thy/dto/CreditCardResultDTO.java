@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreditCardResultDTO {
 
-    private String cardNumLast4digit;   // masked card number
-    private String holderNameInit;      // holder name initials
+    private Long cardId;                // card ID for operations (delete)
+    private String cardNumLast4digit;   // masked card number for display
+    private String holderName;          // full holder name
+    private String expiryTime;          // MM/YY
 }

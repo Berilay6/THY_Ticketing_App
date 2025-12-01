@@ -26,13 +26,38 @@ export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [useExistingCard, setUseExistingCard] = useState(false);
   const [savedCards, setSavedCards] = useState([]);
-  const [selectedCardNum, setSelectedCardNum] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState("");
   const [userMiles, setUserMiles] = useState(0);
 
   const [cardHolder, setCardHolder] = useState("");
   const [cardNum, setCardNum] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
+
+  const handleCardNumChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 16) {
+      setCardNum(value);
+    }
+  };
+
+  const handleCvvChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 3) {
+      setCvv(value);
+    }
+  };
+
+  const handleExpiryChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 4) {
+      if (value.length >= 2) {
+        setExpiry(value.slice(0, 2) + "/" + value.slice(2));
+      } else {
+        setExpiry(value);
+      }
+    }
+  };
   const [loading, setLoading] = useState(false);
 
   const total = basket.reduce((sum, f) => sum + (f.price || 0), 0);
@@ -81,8 +106,8 @@ export default function PaymentPage() {
 
     // Add card info based on payment method and selection
     if (paymentMethod === "card") {
-      if (useExistingCard && selectedCardNum) {
-        paymentReq.cardInfo = { cardNum: selectedCardNum };
+      if (useExistingCard && selectedCardId) {
+        paymentReq.cardInfo = { cardId: selectedCardId };
       } else {
         paymentReq.cardInfo = {
           cardNum,
@@ -173,13 +198,13 @@ export default function PaymentPage() {
                         <FormControl fullWidth sx={{ ml: 4, mt: 1 }}>
                           <InputLabel>Select Card</InputLabel>
                           <Select
-                            value={selectedCardNum}
-                            onChange={(e) => setSelectedCardNum(e.target.value)}
+                            value={selectedCardId}
+                            onChange={(e) => setSelectedCardId(e.target.value)}
                             label="Select Card"
                           >
                             {savedCards.map((card) => (
-                              <MenuItem key={card.cardNum} value={card.cardNum}>
-                                **** **** **** {card.cardNum.slice(-4)} -{" "}
+                              <MenuItem key={card.cardId} value={card.cardId}>
+                                **** **** **** {card.cardNumLast4digit} -{" "}
                                 {card.holderName}
                               </MenuItem>
                             ))}
@@ -209,8 +234,11 @@ export default function PaymentPage() {
                     label="Card number"
                     fullWidth
                     value={cardNum}
-                    onChange={(e) => setCardNum(e.target.value)}
-                    slotProps={{ htmlInput: { maxLength: 16 } }}
+                    onChange={handleCardNumChange}
+                    slotProps={{
+                      htmlInput: { maxLength: 16, inputMode: "numeric" },
+                    }}
+                    helperText="16 digits"
                     required
                   />
                   <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -218,16 +246,22 @@ export default function PaymentPage() {
                       label="Expiry (MM/YY)"
                       fullWidth
                       value={expiry}
-                      onChange={(e) => setExpiry(e.target.value)}
+                      onChange={handleExpiryChange}
                       placeholder="12/25"
+                      slotProps={{
+                        htmlInput: { maxLength: 5, inputMode: "numeric" },
+                      }}
                       required
                     />
                     <TextField
                       label="CVV"
                       fullWidth
                       value={cvv}
-                      onChange={(e) => setCvv(e.target.value)}
-                      slotProps={{ htmlInput: { maxLength: 3 } }}
+                      onChange={handleCvvChange}
+                      slotProps={{
+                        htmlInput: { maxLength: 3, inputMode: "numeric" },
+                      }}
+                      helperText="3 digits"
                       required
                     />
                   </Stack>
@@ -279,7 +313,7 @@ export default function PaymentPage() {
                   (!cardHolder || !cardNum || !expiry || !cvv)) ||
                 (paymentMethod === "card" &&
                   useExistingCard &&
-                  !selectedCardNum) ||
+                  !selectedCardId) ||
                 (paymentMethod === "mile" && userMiles < total)
               }
             >

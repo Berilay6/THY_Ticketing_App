@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class CreditCardRequestDTO {
 
     private Long userId;
+    private Long cardId;  // For using existing saved cards
     private String cardNum;
     private String cvv;
     private String expiryTime;

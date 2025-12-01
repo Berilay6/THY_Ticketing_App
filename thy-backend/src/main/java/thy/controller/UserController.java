@@ -53,9 +53,9 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{userId}/credit-cards/{cardNum}")
-    public ResponseEntity<Void> deleteCreditCard(@PathVariable Long userId, @PathVariable String cardNum) {
-        userService.removeCardFromUser(userId, cardNum);
+    @DeleteMapping("/{userId}/credit-cards/{cardId}")
+    public ResponseEntity<Void> deleteCreditCard(@PathVariable Long userId, @PathVariable Long cardId) {
+        userService.removeCardFromUser(userId, cardId);
         return ResponseEntity.ok().build();
     }
 

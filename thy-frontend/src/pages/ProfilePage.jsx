@@ -7,8 +7,15 @@ import {
   Button,
   InputAdornment,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Delete, Add } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { userApi } from "../api/apiClient";
@@ -26,6 +33,14 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+  const [savedCards, setSavedCards] = useState([]);
+  const [openAddCard, setOpenAddCard] = useState(false);
+  const [newCardHolder, setNewCardHolder] = useState("");
+  const [newCardNum, setNewCardNum] = useState("");
+  const [newCardExpiry, setNewCardExpiry] = useState("");
+  const [newCardCvv, setNewCardCvv] = useState("");
+  const [addCardLoading, setAddCardLoading] = useState(false);
+
   const userId = localStorage.getItem("userId");
   const initialEmail = localStorage.getItem("userEmail");
   const navigate = useNavigate();
@@ -34,6 +49,7 @@ export default function ProfilePage() {
     if (userId) {
       const emailOrPhone = localStorage.getItem("userEmail") || userId;
       loadProfile(emailOrPhone);
+      loadSavedCards();
     }
   }, [userId]);
 
@@ -114,6 +130,96 @@ export default function ProfilePage() {
       .finally(() => setPasswordLoading(false));
   };
 
+  const loadSavedCards = () => {
+    if (!userId) return;
+    userApi
+      .getCreditCards(userId)
+      .then((cards) => {
+        setSavedCards(cards || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load saved cards:", err);
+      });
+  };
+
+  const handleCardNumChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 16) {
+      setNewCardNum(value);
+    }
+  };
+
+  const handleCvvChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 3) {
+      setNewCardCvv(value);
+    }
+  };
+
+  const handleExpiryChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value.length <= 4) {
+      if (value.length >= 2) {
+        setNewCardExpiry(value.slice(0, 2) + "/" + value.slice(2));
+      } else {
+        setNewCardExpiry(value);
+      }
+    }
+  };
+
+  const handleAddCard = () => {
+    if (
+      !userId ||
+      !newCardNum ||
+      !newCardHolder ||
+      !newCardExpiry ||
+      !newCardCvv
+    )
+      return;
+
+    setAddCardLoading(true);
+    userApi
+      .addCreditCard(userId, {
+        cardNum: newCardNum,
+        holderName: newCardHolder,
+        expiryTime: newCardExpiry,
+        cvv: newCardCvv,
+      })
+      .then(() => {
+        alert("Card added successfully!");
+        setOpenAddCard(false);
+        setNewCardHolder("");
+        setNewCardNum("");
+        setNewCardExpiry("");
+        setNewCardCvv("");
+        loadSavedCards();
+      })
+      .catch((err) => {
+        console.error("Failed to add card:", err);
+        alert(err.payload?.message || "Failed to add card.");
+      })
+      .finally(() => setAddCardLoading(false));
+  };
+
+  const handleDeleteCard = (cardId) => {
+    if (
+      !userId ||
+      !window.confirm("Are you sure you want to delete this card?")
+    )
+      return;
+
+    userApi
+      .deleteCreditCard(userId, cardId)
+      .then(() => {
+        alert("Card deleted successfully!");
+        loadSavedCards();
+      })
+      .catch((err) => {
+        console.error("Failed to delete card:", err);
+        alert(err.payload?.message || "Failed to delete card.");
+      });
+  };
+
   return (
     <Box className="page-root" style={{ maxWidth: 640 }}>
       <Typography variant="h5" gutterBottom>
@@ -153,6 +259,57 @@ export default function ProfilePage() {
             {loading ? "Updating..." : "Update"}
           </Button>
         </Stack>
+      </Paper>
+
+      <Paper elevation={0} className="card" sx={{ mt: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="subtitle1">Saved Cards</Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Add />}
+            onClick={() => setOpenAddCard(true)}
+          >
+            Add Card
+          </Button>
+        </Box>
+        {savedCards.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            No saved cards yet.
+          </Typography>
+        ) : (
+          <List>
+            {savedCards.map((card) => (
+              <ListItem
+                key={card.cardId}
+                divider
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    onClick={() => handleDeleteCard(card.cardId)}
+                    color="error"
+                  >
+                    <Delete />
+                  </IconButton>
+                }
+              >
+                <ListItemText
+                  primary={`**** **** **** ${card.cardNumLast4digit}`}
+                  secondary={`${card.holderName}${
+                    card.expiryTime ? ` • Exp: ${card.expiryTime}` : ""
+                  }`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
       </Paper>
 
       <Paper elevation={0} className="card" sx={{ mt: 3 }}>
@@ -219,6 +376,75 @@ export default function ProfilePage() {
           </Button>
         </Stack>
       </Paper>
+
+      <Dialog
+        open={openAddCard}
+        onClose={() => setOpenAddCard(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add Credit Card</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              label="Card holder"
+              fullWidth
+              value={newCardHolder}
+              onChange={(e) => setNewCardHolder(e.target.value)}
+              required
+            />
+            <TextField
+              label="Card number"
+              fullWidth
+              value={newCardNum}
+              onChange={handleCardNumChange}
+              slotProps={{ htmlInput: { maxLength: 16, inputMode: "numeric" } }}
+              helperText="16 digits"
+              required
+            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="Expiry (MM/YY)"
+                fullWidth
+                value={newCardExpiry}
+                onChange={handleExpiryChange}
+                placeholder="12/25"
+                slotProps={{
+                  htmlInput: { maxLength: 5, inputMode: "numeric" },
+                }}
+                required
+              />
+              <TextField
+                label="CVV"
+                fullWidth
+                value={newCardCvv}
+                onChange={handleCvvChange}
+                slotProps={{
+                  htmlInput: { maxLength: 3, inputMode: "numeric" },
+                }}
+                helperText="3 digits"
+                required
+              />
+            </Stack>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddCard(false)}>Cancel</Button>
+          <Button
+            onClick={handleAddCard}
+            variant="contained"
+            disabled={
+              addCardLoading ||
+              !newCardNum ||
+              !newCardHolder ||
+              !newCardExpiry ||
+              !newCardCvv
+            }
+          >
+            {addCardLoading ? "Adding..." : "Add Card"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

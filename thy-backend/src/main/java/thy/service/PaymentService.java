@@ -73,17 +73,37 @@ public class PaymentService {
         // Handle payment method-specific logic
         if ("card".equals(method)) {
             // Handle card payment - save new card if provided
-            if (paymentRequestDTO.getCardInfo() != null && 
-                paymentRequestDTO.getCardInfo().getCardNum() != null &&
-                !paymentRequestDTO.getCardInfo().getCardNum().isEmpty()) {
+            if (paymentRequestDTO.getCardInfo() != null) {
+                CreditCard card = null;
                 
-                CreditCard newCard = new CreditCard();
-                newCard.setUserId(user.getUserId());
-                newCard.setCardNum(paymentRequestDTO.getCardInfo().getCardNum());
-                newCard.setHolderName(paymentRequestDTO.getCardInfo().getHolderName());
-                newCard.setExpiryTime(paymentRequestDTO.getCardInfo().getExpiryTime());
-                newCard.setCvv(paymentRequestDTO.getCardInfo().getCvv());
-                creditCardRepository.save(newCard);
+                // Check if using existing card by cardId
+                if (paymentRequestDTO.getCardInfo().getCardId() != null) {
+                    card = creditCardRepository.findById(paymentRequestDTO.getCardInfo().getCardId())
+                        .orElseThrow(() -> new RuntimeException("Card not found with id: " + paymentRequestDTO.getCardInfo().getCardId()));
+                } 
+                // Otherwise, use or create card by cardNum
+                else if (paymentRequestDTO.getCardInfo().getCardNum() != null &&
+                         !paymentRequestDTO.getCardInfo().getCardNum().isEmpty()) {
+                    card = creditCardRepository.findByCardNum(paymentRequestDTO.getCardInfo().getCardNum())
+                        .orElseGet(() -> {
+                            CreditCard newCard = new CreditCard();
+                            newCard.setCardNum(paymentRequestDTO.getCardInfo().getCardNum());
+                            newCard.setHolderName(paymentRequestDTO.getCardInfo().getHolderName());
+                            newCard.setExpiryTime(paymentRequestDTO.getCardInfo().getExpiryTime());
+                            newCard.setCvv(paymentRequestDTO.getCardInfo().getCvv());
+                            return creditCardRepository.save(newCard);
+                        });
+                }
+                
+                // Link card to user if not already linked
+                if (card != null) {
+                    if (!card.getUsers().contains(user)) {
+                        card.getUsers().add(user);
+                    }
+                    if (!user.getCreditCards().contains(card)) {
+                        user.getCreditCards().add(card);
+                    }
+                }
             }
             // Mark seats as sold for card payments
             for (FlightSeat fs : seatsToUpdate) {

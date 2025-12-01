@@ -79,34 +79,34 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         CreditCard creditCard = creditCardService.findOrCreateCreditCard(creditCardDTO);
-        // Ensure the card is associated to this user in the new OneToMany/ManyToOne model
-        creditCard.setUser(user);
+        
         if (!user.getCreditCards().contains(creditCard)) {
             user.getCreditCards().add(creditCard);
+            creditCard.getUsers().add(user);
         }
     
         userRepository.save(user);
     }
 
     @Transactional
-    public void removeCardFromUser(Long userId, String cardNum) {
+    public void removeCardFromUser(Long userId, Long cardId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         CreditCard creditCard = user.getCreditCards().stream()
-            .filter(card -> card.getCardNum().equals(cardNum))
+            .filter(card -> card.getCardId().equals(cardId))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Credit card not found for user"));
 
         user.getCreditCards().remove(creditCard);
-        // Since each credit card belongs to a single user (user_id in PK),
-        // deleting association implies deleting the credit card itself.
-
-        // delete the user to credit card association
+        creditCard.getUsers().remove(user);
+        
         userRepository.save(user);
-
-        // delete the credit card record
-        creditCardService.deleteCreditCard(creditCard);
+        
+        // If no users left, delete the card
+        if (creditCard.getUsers().isEmpty()) {
+            creditCardService.deleteCreditCard(creditCard);
+        }
     }
 
     @Transactional

@@ -191,22 +191,33 @@ CREATE TABLE Ticket (
         ON DELETE RESTRICT
 );
 
--- User - CreaditCard : 1:N
+-- User - CreditCard : M:N (Many-to-Many)
 -- 9) CREDIT CARD
 CREATE TABLE CreditCard(
-	user_id     BIGINT UNSIGNED  NOT NULL,
-    card_num    CHAR(16)  NOT NULL,
-    CVV  CHAR(3) NOT NULL,
-    expiry_time  CHAR(5) NOT NULL,
-    holder_name  VARCHAR(100) NOT NULL,
+    card_id     BIGINT UNSIGNED AUTO_INCREMENT,
+    card_num    CHAR(16)  NOT NULL UNIQUE,
+    CVV         CHAR(3) NOT NULL,
+    expiry_time CHAR(5) NOT NULL,
+    holder_name VARCHAR(100) NOT NULL,
     
-    PRIMARY KEY (user_id, card_num),
-    CONSTRAINT user_card 
-		FOREIGN KEY (user_id) REFERENCES User(user_id)
+    PRIMARY KEY (card_id),
+	CONSTRAINT card_num_domain CHECK (card_num REGEXP '^[0-9]{11,16}$'),
+    CONSTRAINT cvv_domain CHECK (CVV REGEXP '^[0-9]{3}$'),
+    CONSTRAINT expiry_domain CHECK (expiry_time REGEXP '^(0[1-9]|1[0-2])/[0-9]{2}$')
+);
+
+-- 10) USER_CREDITCARD (Join Table for M:N)
+CREATE TABLE User_CreditCard(
+    user_id BIGINT UNSIGNED NOT NULL,
+    card_id BIGINT UNSIGNED NOT NULL,
+    
+    PRIMARY KEY (user_id, card_id),
+    CONSTRAINT uc_user
+        FOREIGN KEY (user_id) REFERENCES User(user_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-        
-	CONSTRAINT card_number_domain CHECK (card_number REGEXP '^[0-9]{16}$'),
-    CONSTRAINT cvv_domain CHECK (cvv REGEXP '^[0-9]{3}$'),
-    CONSTRAINT expr_domain CHECK (expiry_time REGEXP '^(0[1-9]|1[0-2])/[0-9]{2}$')
+    CONSTRAINT uc_card
+        FOREIGN KEY (card_id) REFERENCES CreditCard(card_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );

@@ -71,6 +71,11 @@ public class User {
     // spring.jpa.hibernate.ddl-auto=update 
     // this setting will automatically create the join table for many-to-many relationship
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "User_CreditCard",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "card_id")
+    )
     private List<CreditCard> creditCards = new ArrayList<>();
 }
