@@ -167,7 +167,21 @@ export default function SignupPage() {
                 onChange={handleChange("password")}
                 fullWidth
                 required
-                inputProps={{ maxLength: 8 }}
+                slotProps={{
+                  htmlInput: { maxLength: 8 },
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
                 error={
                   formData.password.length > 0 && formData.password.length < 8
                 }
@@ -176,18 +190,6 @@ export default function SignupPage() {
                     ? "Password must be exactly 8 characters"
                     : "Enter exactly 8 characters"
                 }
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
               />
             </Grid>
 

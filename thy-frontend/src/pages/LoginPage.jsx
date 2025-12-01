@@ -82,25 +82,27 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
-            inputProps={{ maxLength: 8 }}
+            slotProps={{
+              htmlInput: { maxLength: 8 },
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
             error={password.length > 0 && password.length < 8}
             helperText={
               password.length > 0 && password.length < 8
                 ? "Password must be exactly 8 characters"
                 : "Enter 8 characters"
             }
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
           />
 
           <Button

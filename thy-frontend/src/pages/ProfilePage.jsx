@@ -147,24 +147,20 @@ export default function ProfilePage() {
             size="small"
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
-            inputProps={{ maxLength: 8 }}
-            error={oldPassword.length > 0 && oldPassword.length < 8}
-            helperText={
-              oldPassword.length > 0 && oldPassword.length < 8
-                ? "Password must be exactly 8 characters"
-                : ""
-            }
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowOldPassword(!showOldPassword)}
-                    edge="end"
-                  >
-                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              htmlInput: { maxLength: 8 },
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowOldPassword(!showOldPassword)}
+                      edge="end"
+                    >
+                      {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
           <TextField
@@ -173,24 +169,20 @@ export default function ProfilePage() {
             size="small"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            inputProps={{ maxLength: 8 }}
-            error={newPassword.length > 0 && newPassword.length < 8}
-            helperText={
-              newPassword.length > 0 && newPassword.length < 8
-                ? "Password must be exactly 8 characters"
-                : "Enter exactly 8 characters"
-            }
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    edge="end"
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              htmlInput: { maxLength: 8 },
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      edge="end"
+                    >
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
           <Button
