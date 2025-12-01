@@ -17,11 +17,13 @@ import thy.entity.Ticket;
 import thy.entity.Flight;
 import thy.entity.FlightSeat;
 import thy.entity.User;
+import thy.entity.CreditCard;
 import thy.repository.PaymentRepository;
 import thy.repository.TicketRepository;
 import thy.repository.FlightRepository;
 import thy.repository.FlightSeatRepository;
 import thy.repository.UserRepository;
+import thy.repository.CreditCardRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class PaymentService {
     private final FlightRepository flightRepository;
     private final FlightSeatRepository flightSeatRepository;
     private final UserRepository userRepository;
+    private final CreditCardRepository creditCardRepository;
 
     // User's payment history retrieval service
     public List<PaymentResultDTO> userPaymentHistory(Long userId) {
@@ -39,48 +42,89 @@ public class PaymentService {
         return paymentRepository.findByUserUserId(userId).stream()
             .map(this::convertToPaymentResultDTO).toList();
     }
-
     @Transactional
     public List<PaymentResultDTO> createPayment(PaymentRequestDTO paymentRequestDTO) {
         User user = userRepository.findById(paymentRequestDTO.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Calculate total from FlightSeat prices
+        String method = paymentRequestDTO.getMethod().toLowerCase();
+        
+        // Calculate total from FlightSeat prices (in TL or Miles based on method)
         BigDecimal total = BigDecimal.ZERO;
-        List<Ticket> toCreate = new ArrayList<>();
+        List<FlightSeat> seatsToUpdate = new ArrayList<>();
+        
         for (TicketSummaryDTO t : paymentRequestDTO.getTickets()) {
-            Flight flight = flightRepository.findById(t.getFlightId())
-                .orElseThrow(() -> new RuntimeException("Flight not found: " + t.getFlightId()));
-            
-            // Get the FlightSeat to retrieve the price
             FlightSeat flightSeat = flightSeatRepository.findByFlightIdAndSeatNumber(
                 t.getFlightId(), 
                 t.getSeatNumber() != null ? t.getSeatNumber() : "1A"
             ).orElseThrow(() -> new RuntimeException("FlightSeat not found for flight " + 
                 t.getFlightId() + " and seat " + t.getSeatNumber()));
             
+            // Check if seat is already booked
+            if (FlightSeat.Availability.sold.equals(flightSeat.getAvailability())) {
+                throw new RuntimeException("Seat " + t.getSeatNumber() + " is already booked");
+            }
+            
             if (flightSeat.getPrice() != null) {
                 total = total.add(flightSeat.getPrice());
             }
+            
+            // Mark seat as sold (booked)
+            flightSeat.setAvailability(FlightSeat.Availability.sold);
+            seatsToUpdate.add(flightSeat);
         }
+        
+        // Handle payment method-specific logic
+        if ("card".equals(method)) {
+            // Handle card payment - save new card if provided
+            if (paymentRequestDTO.getCardInfo() != null && 
+                paymentRequestDTO.getCardInfo().getCardNum() != null &&
+                !paymentRequestDTO.getCardInfo().getCardNum().isEmpty()) {
+                
+                CreditCard newCard = new CreditCard();
+                newCard.setUserId(user.getUserId());
+                newCard.setCardNum(paymentRequestDTO.getCardInfo().getCardNum());
+                newCard.setHolderName(paymentRequestDTO.getCardInfo().getHolderName());
+                newCard.setExpiryTime(paymentRequestDTO.getCardInfo().getExpiryTime());
+                newCard.setCvv(paymentRequestDTO.getCardInfo().getCvv());
+                creditCardRepository.save(newCard);
+            }
+        } else if ("mile".equals(method)) {
+            // Check if user has enough miles
+            Integer userMiles = user.getMile() != null ? user.getMile() : 0;
+            if (userMiles < total.intValue()) {
+                throw new RuntimeException("Insufficient miles. Required: " + total.intValue() + 
+                    ", Available: " + userMiles);
+            }
+            // Deduct miles
+            user.setMile(userMiles - total.intValue());
+            userRepository.save(user);
+        }
+        // For cash, no additional processing needed (payment at airport)
 
+        // Update all seats
+        flightSeatRepository.saveAll(seatsToUpdate);
+
+        // Create payment record
         Payment payment = new Payment();
         payment.setUser(user);
-        payment.setMethod(Payment.PaymentMethod.valueOf(paymentRequestDTO.getMethod()));
+        payment.setMethod(Payment.PaymentMethod.valueOf(method));
         payment.setTotalAmount(total);
-        payment.setStatus(Payment.PaymentStatus.paid);
+        payment.setStatus("cash".equals(method) ? Payment.PaymentStatus.pending : Payment.PaymentStatus.paid);
         payment.setPaidAt(LocalDateTime.now());
 
         Payment saved = paymentRepository.save(payment);
 
         // Create tickets linked to payment
+        List<Ticket> toCreate = new ArrayList<>();
         for (TicketSummaryDTO t : paymentRequestDTO.getTickets()) {
             Ticket ticket = new Ticket();
             ticket.setPayment(saved);
+            ticket.setUser(user);
             ticket.setIssueTime(LocalDateTime.now());
             ticket.setFlightId(t.getFlightId());
             ticket.setSeatNumber(t.getSeatNumber() != null ? t.getSeatNumber() : "1A");
-            ticket.setStatus(Ticket.TicketStatus.booked);
+            ticket.setStatus("cash".equals(method) ? Ticket.TicketStatus.pending : Ticket.TicketStatus.booked);
             ticket.setHasExtraBaggage(Boolean.TRUE.equals(t.getHasExtraBaggage()));
             ticket.setHasMealService(Boolean.TRUE.equals(t.getHasMealService()));
             toCreate.add(ticket);
@@ -94,21 +138,29 @@ public class PaymentService {
     
 
     private PaymentResultDTO convertToPaymentResultDTO(Payment payment) {
-        return new PaymentResultDTO(
-            payment.getUser().getUserId(),
-            payment.getTickets().stream()
+        List<TicketSummaryDTO> ticketSummaries = new ArrayList<>();
+        
+        if (payment.getTickets() != null) {
+            ticketSummaries = payment.getTickets().stream()
                 .map(ticket -> new TicketSummaryDTO(
                     ticket.getTicketId(),
                     ticket.getFlightId(),
-                    ticket.getFlight().getOriginAirport().getIataCode(),
-                    ticket.getFlight().getDestinationAirport().getIataCode(),
-                    ticket.getFlight().getDepartureTime(),
-                    ticket.getFlight().getArrivalTime(),
+                    ticket.getFlight() != null && ticket.getFlight().getOriginAirport() != null 
+                        ? ticket.getFlight().getOriginAirport().getIataCode() : null,
+                    ticket.getFlight() != null && ticket.getFlight().getDestinationAirport() != null
+                        ? ticket.getFlight().getDestinationAirport().getIataCode() : null,
+                    ticket.getFlight() != null ? ticket.getFlight().getDepartureTime() : null,
+                    ticket.getFlight() != null ? ticket.getFlight().getArrivalTime() : null,
                     ticket.getSeatNumber(),
-                    ticket.getStatus().name(),
+                    ticket.getStatus() != null ? ticket.getStatus().name() : null,
                     ticket.getHasExtraBaggage(),
                     ticket.getHasMealService()
-                )).toList(),
+                )).toList();
+        }
+        
+        return new PaymentResultDTO(
+            payment.getUser().getUserId(),
+            ticketSummaries,
             payment.getMethod().name(),
             payment.getTotalAmount(),
             null,

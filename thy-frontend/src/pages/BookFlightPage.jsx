@@ -175,13 +175,6 @@ export default function BookFlightPage() {
                 </Stack>
               </Paper>
             ))}
-            <Button
-              size="small"
-              variant="text"
-              onClick={() => navigate("/basket")}
-            >
-              Go to basket
-            </Button>
           </div>
         </>
       )}

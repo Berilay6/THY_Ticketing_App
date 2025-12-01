@@ -24,6 +24,10 @@ public class Ticket {
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "issue_time", nullable = false)
     private LocalDateTime issueTime;
 
@@ -37,7 +41,8 @@ public class Ticket {
         booked,
         cancelled,
         checked_in,
-        completed
+        completed,
+        pending
     }
 
     @Enumerated(EnumType.STRING)

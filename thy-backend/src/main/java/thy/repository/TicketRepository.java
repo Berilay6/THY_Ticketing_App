@@ -8,8 +8,11 @@ import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    // Kullanıcıya göre ticket 
+    // Kullanıcıya göre ticket (via payment)
     List<Ticket> findByPaymentUserUserId(Long userId);
+
+    // Kullanıcıya göre ticket (direct)
+    List<Ticket> findByUserUserId(Long userId);
 
     // Belirli uçuşa ait tüm biletler 
     List<Ticket> findByFlightId(Long flightId);

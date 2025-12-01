@@ -122,7 +122,7 @@ CREATE TABLE FlightSeat (
     flight_id   BIGINT UNSIGNED NOT NULL,
     seat_number VARCHAR(3)      NOT NULL,
     availability ENUM('available','reserved','sold') NOT NULL DEFAULT 'available',
-    price				   DECIMAL(10,2)  NOT NULL,
+    price		DECIMAL(10,2)  NOT NULL,
     
     PRIMARY KEY (flight_id, seat_number),
     CONSTRAINT flightseat_domain CHECK (seat_number REGEXP '^[1-9][0-9]{0,1}[A-Z]$'),
@@ -157,13 +157,15 @@ CREATE TABLE Payment (
 -- 8) TICKET
 -- Ticket – FlightSeat : 1–1
 -- Payment – Ticket : 1–N
+-- User – Ticket : 1–N
 CREATE TABLE Ticket (
     ticket_id          BIGINT UNSIGNED AUTO_INCREMENT,
     payment_id    	   BIGINT UNSIGNED NOT NULL,
+    user_id            BIGINT UNSIGNED NOT NULL,
     issue_time         TIMESTAMP     NOT NULL,
     flight_id          BIGINT UNSIGNED NOT NULL,
     seat_number        VARCHAR(3)   NOT NULL,
-    status             ENUM('booked','cancelled','checked_in','completed') 
+    status             ENUM('booked','cancelled','checked_in','completed','pending') 
                       NOT NULL DEFAULT 'booked',
     has_extra_baggage  BOOLEAN      NOT NULL DEFAULT 0,
     has_meal_service   BOOLEAN      NOT NULL DEFAULT 0,
@@ -179,6 +181,12 @@ CREATE TABLE Ticket (
     CONSTRAINT payment_ticket
         FOREIGN KEY (payment_id)
         REFERENCES Payment(payment_id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    
+    CONSTRAINT ticket_user
+        FOREIGN KEY (user_id)
+        REFERENCES `User`(user_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
         

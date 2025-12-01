@@ -17,7 +17,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
 
     public List<TicketSummaryDTO> getUserTickets(Long userId) {
-        return ticketRepository.findByPaymentUserUserId(userId).stream()
+        return ticketRepository.findByUserUserId(userId).stream()
                 .map(this::convertToSummary)
                 .toList();
     }
