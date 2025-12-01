@@ -21,10 +21,33 @@ function fetchJson(url, options = {}) {
         throw err;
       });
     }
-    if (res.status === 204) return null;
-    return res.json();
+    if (res.status === 204 || res.status === 205) return null;
+
+    // Check if response has content
+    return res.text().then((text) => {
+      if (!text || text.length === 0) return null;
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.warn("Failed to parse JSON response:", text);
+        return null;
+      }
+    });
   });
 }
+
+export const authApi = {
+  login: (credentials) =>
+    fetchJson(endpoints.auth.login, {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }),
+  signup: (userData) =>
+    fetchJson(endpoints.auth.signup, {
+      method: "POST",
+      body: JSON.stringify(userData),
+    }),
+};
 
 export const flightApi = {
   searchFlights: (req) =>
@@ -58,6 +81,11 @@ export const userApi = {
       `${endpoints.users.creditCards(userId)}/${encodeURIComponent(cardNum)}`,
       { method: "DELETE" }
     ),
+  changePassword: (userId, passwordData) =>
+    fetchJson(endpoints.users.changePassword(userId), {
+      method: "PUT",
+      body: JSON.stringify(passwordData),
+    }),
 };
 
 export const paymentApi = {

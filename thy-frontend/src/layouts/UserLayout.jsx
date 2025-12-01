@@ -8,8 +8,11 @@ import {
   AppBar,
   Toolbar,
   Typography,
+  Button,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
@@ -21,6 +24,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ShoppingBasketOutlinedIcon from "@mui/icons-material/ShoppingBasketOutlined";
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import "../styles/layout.css";
 
@@ -47,14 +51,41 @@ const menuItems = [
 ];
 
 export default function UserLayout() {
-  const [greeting, setGreeting] = useState("Hello");
+  const [userName, setUserName] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const firstName = localStorage.getItem("userFirstName");
-    if (firstName) {
-      setGreeting(`Hello, ${firstName}`);
+    const token = localStorage.getItem("authToken");
+    const name = localStorage.getItem("userName");
+
+    if (token && name) {
+      setUserName(name);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
   }, []);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
+    setIsLoggedIn(false);
+    handleMenuClose();
+    navigate("/login");
+  };
+
   return (
     <Box className="app-root">
       <Drawer
@@ -86,9 +117,41 @@ export default function UserLayout() {
               <FlightTakeoffIcon sx={{ color: "var(--primary)" }} />
               <Typography variant="h6">THY Ticketing</Typography>
             </Box>
-            <Typography variant="body2" sx={{ opacity: 0.7 }}>
-              {greeting}
-            </Typography>
+
+            {isLoggedIn ? (
+              <>
+                <Button
+                  startIcon={<AccountCircleIcon />}
+                  onClick={handleMenuOpen}
+                  sx={{ color: "inherit" }}
+                >
+                  {userName}
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose();
+                      navigate("/profile");
+                    }}
+                  >
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                variant="outlined"
+                onClick={() => navigate("/login")}
+                sx={{ color: "inherit", borderColor: "inherit" }}
+              >
+                Login
+              </Button>
+            )}
           </Toolbar>
         </AppBar>
 

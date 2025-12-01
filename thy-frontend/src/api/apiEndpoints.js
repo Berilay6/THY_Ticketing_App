@@ -1,6 +1,10 @@
 const BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
 
 export const endpoints = {
+  auth: {
+    login: `${BASE}/auth/login`,
+    signup: `${BASE}/auth/signup`,
+  },
   flights: {
     search: `${BASE}/flights/search`,
     seats: (flightId) => `${BASE}/flights/${flightId}/seats`,
@@ -13,6 +17,7 @@ export const endpoints = {
     update: (userId) => `${BASE}/users/${userId}`,
     delete: (userId) => `${BASE}/users/${userId}`,
     creditCards: (userId) => `${BASE}/users/${userId}/credit-cards`,
+    changePassword: (userId) => `${BASE}/users/${userId}/change-password`,
   },
   payments: {
     create: `${BASE}/payments`,

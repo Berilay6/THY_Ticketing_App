@@ -1,11 +1,13 @@
 package thy.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import thy.dto.UserDTO;
 import thy.dto.CreditCardRequestDTO;
 import thy.dto.CreditCardResultDTO;
+import thy.dto.ChangePasswordRequestDTO;
 import thy.service.UserService;
 import thy.service.CreditCardService;
 
@@ -54,6 +56,12 @@ public class UserController {
     @DeleteMapping("/{userId}/credit-cards/{cardNum}")
     public ResponseEntity<Void> deleteCreditCard(@PathVariable Long userId, @PathVariable String cardNum) {
         userService.removeCardFromUser(userId, cardNum);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{userId}/change-password")
+    public ResponseEntity<Void> changePassword(@PathVariable Long userId, @Valid @RequestBody ChangePasswordRequestDTO request) {
+        userService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok().build();
     }
 }

@@ -1,5 +1,6 @@
 package thy.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CreditCardService creditCardService;
+    private final PasswordEncoder passwordEncoder;
 
     public UserDTO getUserByEmailOrPhoneNum(String emailOrPhoneNum) {
 
@@ -89,6 +91,21 @@ public class UserService {
 
         // delete the credit card record
         creditCardService.deleteCreditCard(creditCard);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verify old password
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // Update to new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     private UserDTO convertToUserDTO(User user) {

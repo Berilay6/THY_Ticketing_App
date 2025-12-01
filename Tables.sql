@@ -20,7 +20,7 @@ CREATE TABLE `User` (
     gender        ENUM('F','M','O') NOT NULL,
     nationality   VARCHAR(50)  NULL,
     email         VARCHAR(100) NOT NULL UNIQUE,
-    password      CHAR(8) NOT NULL,
+    password      VARCHAR(60) NOT NULL,
     phone_num     VARCHAR(15)  NOT NULL UNIQUE,
     user_type     ENUM('customer','admin') NOT NULL DEFAULT 'customer',
     mile          INT NOT NULL DEFAULT 0,

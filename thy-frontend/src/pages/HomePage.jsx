@@ -8,9 +8,10 @@ export default function HomePage() {
   const [greeting, setGreeting] = useState("Welcome");
 
   useEffect(() => {
-    const firstName = localStorage.getItem("userFirstName");
-    if (firstName) {
-      setGreeting(`Welcome back, ${firstName}`);
+    const userName = localStorage.getItem("userName");
+    if (userName) {
+      const firstName = userName.split(" ")[0];
+      setGreeting(`Welcome, ${firstName}`);
     }
   }, []);
 

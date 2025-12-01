@@ -49,7 +49,7 @@ public class User {
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 8)
+    @Column(name = "password", nullable = false, length = 60)
     private String password;
 
     @Column(name = "phone_num", nullable = false, length = 15, unique = true)
