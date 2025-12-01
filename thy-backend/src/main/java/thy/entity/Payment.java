@@ -39,9 +39,6 @@ public class Payment {
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "currency", nullable = false, length = 3)
-    private String currency;
-
     public enum PaymentStatus {
         pending,
         paid,

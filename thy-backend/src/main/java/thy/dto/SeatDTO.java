@@ -3,6 +3,7 @@ package thy.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -15,5 +16,5 @@ public class SeatDTO {
     private String type; // economy, business vs.
     private String status;  // seat tablosundaki status: active/broken/unavailable
     private String availability; // FlightSeat tablosundaki availability: available/reserved/sold
-    private Double price;  // İleride her koltuğun fiyatı farklı olursa diye
+    private BigDecimal price;  // Her koltuğun fiyatı
 }

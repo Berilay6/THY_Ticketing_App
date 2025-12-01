@@ -10,6 +10,7 @@ import BookFlightPage from "./pages/BookFlightPage";
 import BasketPage from "./pages/BasketPage";
 import PaymentPage from "./pages/PaymentPage";
 import CheckInPage from "./pages/CheckInPage";
+import SeatSelectionPage from "./pages/SeatSelectionPage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="payments-history" element={<PaymentsHistoryPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="book-flight" element={<BookFlightPage />} />
+        <Route path="select-seat/:flightId" element={<SeatSelectionPage />} />
         <Route path="basket" element={<BasketPage />} />
         <Route path="payment" element={<PaymentPage />} />
         <Route path="check-in" element={<CheckInPage />} />

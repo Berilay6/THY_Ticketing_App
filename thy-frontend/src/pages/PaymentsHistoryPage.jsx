@@ -45,7 +45,7 @@ export default function PaymentsHistoryPage() {
         payments.map((p) => (
           <Paper key={p.paymentId} elevation={0} className="card">
             <Typography sx={{ fontWeight: 500 }}>
-              {p.totalAmount} {p.currency} • {p.method}
+              {p.totalAmount} TL • {p.method}
             </Typography>
             <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
               Tickets: {p.tickets?.length || 0}

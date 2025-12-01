@@ -35,28 +35,28 @@ export default function BasketPage() {
       ) : (
         <>
           <div className="basket-list">
-            {basket.map((f) => (
+            {basket.map((item, index) => (
               <Paper
-                key={f.flightId ?? f.id}
+                key={`${item.flightId}-${item.seatNumber}-${index}`}
                 elevation={0}
                 className="card basket-item"
               >
                 <Box>
                   <Typography sx={{ fontWeight: 500 }}>
-                    {f.origin} → {f.destination}
+                    Flight {item.flightId} • Seat {item.seatNumber}
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{ color: "var(--text-muted)" }}
                   >
-                    {formatDateTime(f.departureTime)}
+                    Type: {item.type}
                   </Typography>
                   <Typography variant="body2" sx={{ marginTop: "0.25rem" }}>
-                    {f.price} TL
+                    {item.price} TL
                   </Typography>
                 </Box>
                 <IconButton
-                  onClick={() => removeFromBasket(f.flightId ?? f.id)}
+                  onClick={() => removeFromBasket(item.flightId ?? item.id)}
                 >
                   <DeleteOutlineIcon />
                 </IconButton>

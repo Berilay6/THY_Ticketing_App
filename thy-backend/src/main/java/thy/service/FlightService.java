@@ -49,8 +49,7 @@ public class FlightService {
             flight.getDestinationAirport().getName(),
             flight.getDepartureTime(),
             flight.getArrivalTime(),
-            flight.getPlane().getModelType(),
-            flight.getPrice()
+            flight.getPlane().getModelType()
         );
     }
 }

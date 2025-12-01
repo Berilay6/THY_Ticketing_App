@@ -15,10 +15,12 @@ import thy.dto.TicketSummaryDTO;
 import thy.entity.Payment;
 import thy.entity.Ticket;
 import thy.entity.Flight;
+import thy.entity.FlightSeat;
 import thy.entity.User;
 import thy.repository.PaymentRepository;
 import thy.repository.TicketRepository;
 import thy.repository.FlightRepository;
+import thy.repository.FlightSeatRepository;
 import thy.repository.UserRepository;
 
 @Service
@@ -28,6 +30,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
+    private final FlightSeatRepository flightSeatRepository;
     private final UserRepository userRepository;
 
     // User's payment history retrieval service
@@ -42,14 +45,22 @@ public class PaymentService {
         User user = userRepository.findById(paymentRequestDTO.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Calculate total from flights
+        // Calculate total from FlightSeat prices
         BigDecimal total = BigDecimal.ZERO;
         List<Ticket> toCreate = new ArrayList<>();
         for (TicketSummaryDTO t : paymentRequestDTO.getTickets()) {
             Flight flight = flightRepository.findById(t.getFlightId())
                 .orElseThrow(() -> new RuntimeException("Flight not found: " + t.getFlightId()));
-            if (flight.getPrice() != null) {
-                total = total.add(flight.getPrice());
+            
+            // Get the FlightSeat to retrieve the price
+            FlightSeat flightSeat = flightSeatRepository.findByFlightIdAndSeatNumber(
+                t.getFlightId(), 
+                t.getSeatNumber() != null ? t.getSeatNumber() : "1A"
+            ).orElseThrow(() -> new RuntimeException("FlightSeat not found for flight " + 
+                t.getFlightId() + " and seat " + t.getSeatNumber()));
+            
+            if (flightSeat.getPrice() != null) {
+                total = total.add(flightSeat.getPrice());
             }
         }
 
@@ -57,7 +68,6 @@ public class PaymentService {
         payment.setUser(user);
         payment.setMethod(Payment.PaymentMethod.valueOf(paymentRequestDTO.getMethod()));
         payment.setTotalAmount(total);
-        payment.setCurrency("TRY");
         payment.setStatus(Payment.PaymentStatus.paid);
         payment.setPaidAt(LocalDateTime.now());
 
@@ -101,7 +111,6 @@ public class PaymentService {
                 )).toList(),
             payment.getMethod().name(),
             payment.getTotalAmount(),
-            payment.getCurrency(),
             null,
             null
         );

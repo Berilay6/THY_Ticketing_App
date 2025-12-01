@@ -122,6 +122,7 @@ CREATE TABLE FlightSeat (
     flight_id   BIGINT UNSIGNED NOT NULL,
     seat_number VARCHAR(3)      NOT NULL,
     availability ENUM('available','reserved','sold') NOT NULL DEFAULT 'available',
+    price       DECIMAL(10,2)   NULL,
     
     PRIMARY KEY (flight_id, seat_number),
     CONSTRAINT flightseat_domain CHECK (seat_number REGEXP '^[1-9][0-9]{0,1}[A-Z]$'),
@@ -140,7 +141,6 @@ CREATE TABLE Payment (
     user_id      BIGINT UNSIGNED NOT NULL,
     method       ENUM('card','mile','cash') NOT NULL,
     total_amount DECIMAL(10,2) NOT NULL,
-    currency     CHAR(3)       NOT NULL,
     status       ENUM('pending','paid','refunded','failed') 
                 NOT NULL DEFAULT 'pending',
     paid_at      TIMESTAMP      NULL,

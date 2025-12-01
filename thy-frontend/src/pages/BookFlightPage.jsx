@@ -5,7 +5,11 @@ import {
   TextField,
   Button,
   Stack,
+  Chip,
+  Divider,
 } from "@mui/material";
+import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useState } from "react";
 import { useBooking } from "../context/BookingContext";
 import { useNavigate } from "react-router-dom";
@@ -106,25 +110,67 @@ export default function BookFlightPage() {
                 elevation={0}
                 className="card book-flight-item"
               >
-                <Box>
-                  <div className="book-flight-info-main">
-                    {flight.flightCode}
-                  </div>
-                  <div className="book-flight-info-sub">
-                    {flight.origin} → {flight.destination} •{" "}
-                    {flight.departureTime}
-                  </div>
-                  <div className="book-flight-price">
-                    <strong>{flight.price?.toFixed(2)} TL</strong>
-                  </div>
+                <Box sx={{ flex: 1 }}>
+                  <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                    <FlightTakeoffIcon color="primary" />
+                    <Typography variant="h6" fontWeight="600">
+                      {flight.planeModel}
+                    </Typography>
+                  </Stack>
+
+                  <Stack direction="row" spacing={2} alignItems="center" mb={1}>
+                    <Chip
+                      label={flight.origin}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                    <Typography color="text.secondary">→</Typography>
+                    <Chip
+                      label={flight.destination}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  </Stack>
+
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <AccessTimeIcon fontSize="small" color="action" />
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(flight.departureTime).toLocaleString("tr-TR", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(flight.arrivalTime).toLocaleString("tr-TR", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Typography>
+                  </Stack>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    mt={1}
+                    display="block"
+                  >
+                    {flight.originAirportName} - {flight.destinationAirportName}
+                  </Typography>
                 </Box>
                 <Stack spacing={1} alignItems="flex-end">
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     size="small"
-                    onClick={() => addToBasket(flight)}
+                    onClick={() => navigate(`/select-seat/${flight.flightId}`)}
                   >
-                    Select & add to basket
+                    Select Seat
                   </Button>
                 </Stack>
               </Paper>

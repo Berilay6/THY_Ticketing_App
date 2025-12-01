@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "FlightSeat")
@@ -32,6 +33,9 @@ public class FlightSeat {
     @Enumerated(EnumType.STRING)
     @Column(name = "availability", nullable = false, length = 10)
     private Availability availability = Availability.available;
+
+    @Column(name = "price", precision = 10, scale = 2)
+    private BigDecimal price;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", insertable = false, updatable = false)

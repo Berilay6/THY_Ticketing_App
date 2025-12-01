@@ -24,34 +24,49 @@ public class FlightSeatService {
     private final SeatRepository seatRepository;
 
     public List<SeatDTO> getFlightSeats(Long flightId) {
-        List<FlightSeat> flightSeats = flightSeatRepository.findByFlightId(flightId);
-        if (flightSeats == null || flightSeats.isEmpty()) return Collections.emptyList();
-
-        Long planeId = null;
-        if (flightSeats.get(0).getFlight() != null && flightSeats.get(0).getFlight().getPlane() != null) {
-            planeId = flightSeats.get(0).getFlight().getPlane().getPlaneId();
-        }
-
-        List<Seat> seats = planeId != null ? seatRepository.findByPlaneId(planeId) : Collections.emptyList();
-        Map<String, Seat> seatMap = seats.stream().collect(Collectors.toMap(Seat::getSeatNumber, s -> s));
-
-        List<SeatDTO> result = new ArrayList<>();
-        for (FlightSeat fs : flightSeats) {
-            SeatDTO dto = new SeatDTO();
-            dto.setSeatNumber(fs.getSeatNumber());
-            Seat seat = seatMap.get(fs.getSeatNumber());
-            dto.setType(seat != null && seat.getType() != null ? seat.getType().name() : null);
-            dto.setStatus(seat != null && seat.getStatus() != null ? seat.getStatus().name() : null);
-            dto.setAvailability(fs.getAvailability() != null ? fs.getAvailability().name() : null);
-            if (fs.getFlight() != null && fs.getFlight().getPrice() != null) {
-                dto.setPrice(fs.getFlight().getPrice().doubleValue());
-            } else {
-                dto.setPrice(null);
+        try {
+            List<FlightSeat> flightSeats = flightSeatRepository.findByFlightId(flightId);
+            if (flightSeats == null || flightSeats.isEmpty()) {
+                return Collections.emptyList();
             }
-            result.add(dto);
-        }
 
-        return result;
+            // Get plane ID from the first FlightSeat's Flight
+            Long planeId = null;
+            for (FlightSeat fs : flightSeats) {
+                if (fs.getFlight() != null && fs.getFlight().getPlane() != null) {
+                    planeId = fs.getFlight().getPlane().getPlaneId();
+                    break;
+                }
+            }
+
+            // Get seat types from Seat table
+            Map<String, Seat> seatMap = Collections.emptyMap();
+            if (planeId != null) {
+                List<Seat> seats = seatRepository.findByPlaneId(planeId);
+                seatMap = seats.stream()
+                    .collect(Collectors.toMap(Seat::getSeatNumber, s -> s, (a, b) -> a));
+            }
+
+            // Build result DTOs
+            List<SeatDTO> result = new ArrayList<>();
+            for (FlightSeat fs : flightSeats) {
+                SeatDTO dto = new SeatDTO();
+                dto.setSeatNumber(fs.getSeatNumber());
+                
+                Seat seat = seatMap.get(fs.getSeatNumber());
+                dto.setType(seat != null && seat.getType() != null ? seat.getType().name() : "economy");
+                dto.setStatus(seat != null && seat.getStatus() != null ? seat.getStatus().name() : "active");
+                dto.setAvailability(fs.getAvailability() != null ? fs.getAvailability().name() : "available");
+                dto.setPrice(fs.getPrice());
+                
+                result.add(dto);
+            }
+
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error loading flight seats: " + e.getMessage(), e);
+        }
     }
 
     public SeatDTO getFlightSeatStatus(Long flightId, String seatNumber) {
@@ -81,8 +96,7 @@ public class FlightSeatService {
         dto.setType(seat != null && seat.getType() != null ? seat.getType().name() : null);
         dto.setStatus(seat != null && seat.getStatus() != null ? seat.getStatus().name() : null);
         dto.setAvailability(fs.getAvailability() != null ? fs.getAvailability().name() : null);
-        if (fs.getFlight() != null && fs.getFlight().getPrice() != null) dto.setPrice(fs.getFlight().getPrice().doubleValue());
-        else dto.setPrice(null);
+        dto.setPrice(fs.getPrice());
 
         return dto;
     }

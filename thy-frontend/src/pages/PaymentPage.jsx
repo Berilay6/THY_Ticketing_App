@@ -29,9 +29,9 @@ export default function PaymentPage() {
     setLoading(true);
     const paymentReq = {
       userId,
-      tickets: basket.map((f) => ({
-        flightId: f.flightId,
-        seatNumber: "1A",
+      tickets: basket.map((item) => ({
+        flightId: item.flightId,
+        seatNumber: item.seatNumber,
       })),
       method: "card",
       cardInfo: {
@@ -107,7 +107,8 @@ export default function PaymentPage() {
               Order summary
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              {basket.length} flight(s) • Total: <strong>{total} TL</strong>
+              {basket.length} seat(s) • Total:{" "}
+              <strong>{total.toFixed(2)} TL</strong>
             </Typography>
             <Button
               variant="contained"

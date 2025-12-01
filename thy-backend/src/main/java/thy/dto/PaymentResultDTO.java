@@ -16,7 +16,6 @@ public class PaymentResultDTO {
     private List<TicketSummaryDTO> tickets;
     private String method;    // "card", "mile", "cash"
     private BigDecimal totalAmount;
-    private String currency;
 
     // Kartla ödemeyse doldurulacak alanlar:
     private String cardNum;     // last 4 digits

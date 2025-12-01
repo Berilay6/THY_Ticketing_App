@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -20,5 +19,4 @@ public class FlightSearchResultDTO {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String planeModel;    // Plane.modelType mesela: "Boeing 737-800"
-    private BigDecimal price;    // Uçuş fiyatı
 }

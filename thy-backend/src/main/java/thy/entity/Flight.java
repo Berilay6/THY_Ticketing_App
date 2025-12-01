@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Flight")
@@ -41,8 +40,5 @@ public class Flight {
     @ManyToOne
     @JoinColumn(name = "plane_id", nullable = false)
     private Plane plane;
-
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
 
 }
