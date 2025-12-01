@@ -14,13 +14,11 @@ import thy.dto.PaymentResultDTO;
 import thy.dto.TicketSummaryDTO;
 import thy.entity.Payment;
 import thy.entity.Ticket;
-import thy.entity.Flight;
 import thy.entity.FlightSeat;
 import thy.entity.User;
 import thy.entity.CreditCard;
 import thy.repository.PaymentRepository;
 import thy.repository.TicketRepository;
-import thy.repository.FlightRepository;
 import thy.repository.FlightSeatRepository;
 import thy.repository.UserRepository;
 import thy.repository.CreditCardRepository;
@@ -31,16 +29,16 @@ public class PaymentService {
     
     private final PaymentRepository paymentRepository;
     private final TicketRepository ticketRepository;
-    private final FlightRepository flightRepository;
     private final FlightSeatRepository flightSeatRepository;
     private final UserRepository userRepository;
     private final CreditCardRepository creditCardRepository;
 
     // User's payment history retrieval service
+    @Transactional
     public List<PaymentResultDTO> userPaymentHistory(Long userId) {
-        
-        return paymentRepository.findByUserUserId(userId).stream()
-            .map(this::convertToPaymentResultDTO).toList();
+        return paymentRepository.findByUserUserIdOrderByPaidAtDesc(userId).stream()
+            .map(this::convertToPaymentResultDTO)
+            .toList();
     }
     @Transactional
     public List<PaymentResultDTO> createPayment(PaymentRequestDTO paymentRequestDTO) {
@@ -69,8 +67,6 @@ public class PaymentService {
                 total = total.add(flightSeat.getPrice());
             }
             
-            // Mark seat as sold (booked)
-            flightSeat.setAvailability(FlightSeat.Availability.sold);
             seatsToUpdate.add(flightSeat);
         }
         
@@ -89,6 +85,10 @@ public class PaymentService {
                 newCard.setCvv(paymentRequestDTO.getCardInfo().getCvv());
                 creditCardRepository.save(newCard);
             }
+            // Mark seats as sold for card payments
+            for (FlightSeat fs : seatsToUpdate) {
+                fs.setAvailability(FlightSeat.Availability.sold);
+            }
         } else if ("mile".equals(method)) {
             // Check if user has enough miles
             Integer userMiles = user.getMile() != null ? user.getMile() : 0;
@@ -99,8 +99,16 @@ public class PaymentService {
             // Deduct miles
             user.setMile(userMiles - total.intValue());
             userRepository.save(user);
+            // Mark seats as sold for mile payments
+            for (FlightSeat fs : seatsToUpdate) {
+                fs.setAvailability(FlightSeat.Availability.sold);
+            }
+        } else if ("cash".equals(method)) {
+            // Mark seats as reserved for cash payments (pending)
+            for (FlightSeat fs : seatsToUpdate) {
+                fs.setAvailability(FlightSeat.Availability.reserved);
+            }
         }
-        // For cash, no additional processing needed (payment at airport)
 
         // Update all seats
         flightSeatRepository.saveAll(seatsToUpdate);

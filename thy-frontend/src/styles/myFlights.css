@@ -20,4 +20,6 @@
   border-radius: 999px;
   border: 1px solid var(--primary);
   color: var(--primary);
+  text-align: center;
+  display: inline-block;
 }

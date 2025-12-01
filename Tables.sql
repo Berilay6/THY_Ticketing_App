@@ -188,9 +188,7 @@ CREATE TABLE Ticket (
         FOREIGN KEY (user_id)
         REFERENCES `User`(user_id)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-        
-    UNIQUE (flight_id, seat_number)
+        ON DELETE RESTRICT
 );
 
 -- User - CreaditCard : 1:N

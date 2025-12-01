@@ -33,7 +33,7 @@ export default function MyFlightsPage() {
     ticketApi
       .cancelTicket(ticketId)
       .then(() => {
-        setTickets(tickets.filter((t) => t.ticketId !== ticketId));
+        loadUserTickets();
       })
       .catch((err) => {
         console.error("Failed to cancel ticket:", err);
@@ -67,7 +67,7 @@ export default function MyFlightsPage() {
                   {t.origin} → {t.destination}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
-                  {t.departureTime} • Seat: {t.seatNumber}
+                  {t.departureTime?.replace("T", " ")} • Seat: {t.seatNumber}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -79,16 +79,18 @@ export default function MyFlightsPage() {
 
               <Box sx={{ textAlign: "right" }}>
                 <div className="myflights-status-chip">{t.status}</div>
-                {t.status === "booked" && (
-                  <Button
-                    variant="text"
-                    color="error"
-                    size="small"
-                    sx={{ marginTop: "0.25rem" }}
-                    onClick={() => handleCancelTicket(t.ticketId)}
-                  >
-                    Cancel ticket
-                  </Button>
+                {(t.status === "booked" || t.status === "pending") && (
+                  <div>
+                    <Button
+                      variant="text"
+                      color="error"
+                      size="small"
+                      sx={{ marginTop: "0.5rem" }}
+                      onClick={() => handleCancelTicket(t.ticketId)}
+                    >
+                      Cancel ticket
+                    </Button>
+                  </div>
                 )}
               </Box>
             </Paper>
