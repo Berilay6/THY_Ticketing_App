@@ -10,6 +10,7 @@ import thy.dto.FlightSearchRequestDTO;
 import thy.dto.FlightSearchResultDTO;
 import thy.entity.Flight;
 import thy.repository.FlightRepository;
+import thy.util.DTOMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -37,19 +38,6 @@ public class FlightService {
             flightSearchRequestDTO.getDestination(),
             startOfDay,
             endOfDay
-            ).stream().map(this::convertToFlightSearchResultDTO).toList();
-    }
-
-    private FlightSearchResultDTO convertToFlightSearchResultDTO(Flight flight) {
-        return new FlightSearchResultDTO(
-            flight.getFlightId(),
-            flight.getOriginAirport().getIataCode(),
-            flight.getDestinationAirport().getIataCode(),
-            flight.getOriginAirport().getName(),
-            flight.getDestinationAirport().getName(),
-            flight.getDepartureTime(),
-            flight.getArrivalTime(),
-            flight.getPlane().getModelType()
-        );
+            ).stream().map(DTOMapper::toFlightSearchResultDTO).toList();
     }
 }

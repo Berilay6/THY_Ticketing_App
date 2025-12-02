@@ -16,6 +16,8 @@ public class FlightSearchResultDTO {
     private String destination;
     private String originAirportName;    // Havalimanı isimleri 
     private String destinationAirportName;
+    private String originTimezone;    // Örn: "UTC+03:00"
+    private String destinationTimezone;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String planeModel;    // Plane.modelType mesela: "Boeing 737-800"

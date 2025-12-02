@@ -60,7 +60,17 @@ export default function PaymentPage() {
   };
   const [loading, setLoading] = useState(false);
 
-  const total = basket.reduce((sum, f) => sum + (f.price || 0), 0);
+  const EXTRA_BAGGAGE_PRICE = 150;
+  const MEAL_SERVICE_PRICE = 75;
+
+  const calculateItemTotal = (item) => {
+    let itemTotal = item.price || 0;
+    if (item.hasExtraBaggage) itemTotal += EXTRA_BAGGAGE_PRICE;
+    if (item.hasMealService) itemTotal += MEAL_SERVICE_PRICE;
+    return itemTotal;
+  };
+
+  const total = basket.reduce((sum, item) => sum + calculateItemTotal(item), 0);
   const userId = localStorage.getItem("userId");
   const userEmail = localStorage.getItem("userEmail");
 
@@ -100,6 +110,8 @@ export default function PaymentPage() {
       tickets: basket.map((item) => ({
         flightId: item.flightId,
         seatNumber: item.seatNumber,
+        hasExtraBaggage: item.hasExtraBaggage || false,
+        hasMealService: item.hasMealService || false,
       })),
       method: paymentMethod,
     };

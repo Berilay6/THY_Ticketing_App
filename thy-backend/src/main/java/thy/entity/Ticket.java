@@ -40,7 +40,6 @@ public class Ticket {
     public enum TicketStatus {
         booked,
         cancelled,
-        checked_in,
         completed,
         pending
     }

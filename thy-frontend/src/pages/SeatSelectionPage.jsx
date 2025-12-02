@@ -1,4 +1,13 @@
-import { Box, Typography, Paper, Button, Grid, Chip } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  Chip,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { flightApi } from "../api/apiClient";
@@ -10,8 +19,14 @@ export default function SeatSelectionPage() {
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [flightInfo, setFlightInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [hasExtraBaggage, setHasExtraBaggage] = useState(false);
+  const [hasMealService, setHasMealService] = useState(false);
   const { addToBasket } = useBooking();
   const navigate = useNavigate();
+
+  // Extra service pricing
+  const EXTRA_BAGGAGE_PRICE = 150;
+  const MEAL_SERVICE_PRICE = 75;
 
   useEffect(() => {
     if (flightId) {
@@ -50,7 +65,8 @@ export default function SeatSelectionPage() {
       seatNumber: selectedSeat.seatNumber,
       price: selectedSeat.price,
       type: selectedSeat.type,
-      // You can add flight info here if needed
+      hasExtraBaggage: hasExtraBaggage,
+      hasMealService: hasMealService,
     };
 
     addToBasket(basketItem);
@@ -143,8 +159,39 @@ export default function SeatSelectionPage() {
                 <strong>Type:</strong> {selectedSeat.type}
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Price:</strong> {selectedSeat.price} TL
+                <strong>Base Price:</strong> {selectedSeat.price} TL
               </Typography>
+
+              <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+                Extra Services
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hasExtraBaggage}
+                    onChange={(e) => setHasExtraBaggage(e.target.checked)}
+                  />
+                }
+                label={`Extra Baggage (+${EXTRA_BAGGAGE_PRICE} TL)`}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hasMealService}
+                    onChange={(e) => setHasMealService(e.target.checked)}
+                  />
+                }
+                label={`Meal Service (+${MEAL_SERVICE_PRICE} TL)`}
+              />
+
+              <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>
+                <strong>Total Price:</strong>{" "}
+                {selectedSeat.price +
+                  (hasExtraBaggage ? EXTRA_BAGGAGE_PRICE : 0) +
+                  (hasMealService ? MEAL_SERVICE_PRICE : 0)}{" "}
+                TL
+              </Typography>
+
               <Button variant="contained" fullWidth onClick={handleAddToBasket}>
                 Add to Basket
               </Button>

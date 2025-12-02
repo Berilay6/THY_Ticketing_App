@@ -95,12 +95,5 @@ public class TicketService {
         return DTOMapper.toTicketSummaryDTO(ticket);
     }
 
-    @Transactional
-    public TicketSummaryDTO checkInTicket(Long ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
-        if (ticket == null) return null;
-        ticket.setStatus(Ticket.TicketStatus.checked_in);
-        ticketRepository.save(ticket);
-        return DTOMapper.toTicketSummaryDTO(ticket);
-    }
+   
 }

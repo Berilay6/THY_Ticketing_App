@@ -23,6 +23,35 @@ export default function BookFlightPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const formatDateTime = (dateTime, timezone) => {
+    if (!dateTime || !timezone) return "";
+    const date = new Date(dateTime);
+
+    // Parse timezone string like "UTC+03:00" or "UTC-08:00"
+    const match = timezone.match(/UTC([+-])(\d{2}):(\d{2})/);
+    if (!match) return date.toLocaleString();
+
+    const sign = match[1] === "+" ? 1 : -1;
+    const hours = parseInt(match[2]);
+    const minutes = parseInt(match[3]);
+    const offsetMinutes = sign * (hours * 60 + minutes);
+
+    // Calculate local time with offset
+    const utcTime = date.getTime();
+    const localTime = new Date(utcTime + offsetMinutes * 60000);
+
+    const timeStr = localTime.toLocaleString("en-US", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${timeStr} (${timezone})`;
+  };
+
   const { addToBasket } = useBooking();
   const navigate = useNavigate();
 
@@ -137,21 +166,17 @@ export default function BookFlightPage() {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <AccessTimeIcon fontSize="small" color="action" />
                     <Typography variant="body2" color="text.secondary">
-                      {new Date(flight.departureTime).toLocaleString("tr-TR", {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatDateTime(
+                        flight.departureTime,
+                        flight.originTimezone
+                      )}
                     </Typography>
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                     <Typography variant="body2" color="text.secondary">
-                      {new Date(flight.arrivalTime).toLocaleString("tr-TR", {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatDateTime(
+                        flight.arrivalTime,
+                        flight.destinationTimezone
+                      )}
                     </Typography>
                   </Stack>
 

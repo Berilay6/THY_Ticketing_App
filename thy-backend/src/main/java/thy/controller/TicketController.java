@@ -28,10 +28,4 @@ public class TicketController {
 		return ResponseEntity.ok(dto);
 	}
 
-	@PostMapping("/{ticketId}/checkin")
-	public ResponseEntity<TicketSummaryDTO> checkInTicket(@PathVariable Long ticketId) {
-		TicketSummaryDTO dto = ticketService.checkInTicket(ticketId);
-		if (dto == null) return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(dto);
-	}
 }
