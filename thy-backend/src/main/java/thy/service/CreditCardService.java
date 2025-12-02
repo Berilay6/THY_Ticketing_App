@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import thy.dto.CreditCardRequestDTO;
 import thy.dto.CreditCardResultDTO;
 import thy.entity.CreditCard;
+import thy.util.DTOMapper;
 import thy.repository.CreditCardRepository;
 
 @Service
@@ -19,7 +20,7 @@ public class CreditCardService {
 
     public List<CreditCardResultDTO> getCreditCardsByUserId(Long userId) {
         return creditCardRepository.findByUserId(userId).stream()
-            .map(this::convertToCreditCardResultDTO)
+            .map(DTOMapper::toCreditCardResultDTO)
             .toList();
     }
 
@@ -40,17 +41,5 @@ public class CreditCardService {
     @Transactional
     public void deleteCreditCard(CreditCard creditCard) {
         creditCardRepository.delete(creditCard);
-    }
-
-    private CreditCardResultDTO convertToCreditCardResultDTO(CreditCard creditCard) {
-        String cardNum = creditCard.getCardNum();
-        String cardNumLast4digit = cardNum.substring(cardNum.length() - 4);
-
-        return new CreditCardResultDTO(
-            creditCard.getCardId(),
-            cardNumLast4digit,
-            creditCard.getHolderName(),
-            creditCard.getExpiryTime()
-        );
     }
 }

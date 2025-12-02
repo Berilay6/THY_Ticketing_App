@@ -8,7 +8,8 @@ import thy.entity.Ticket;
 import thy.entity.Payment;
 import thy.entity.FlightSeat;
 import thy.entity.User;
-import thy.entity.Seat;
+import thy.util.MilesCalculator;
+import thy.util.DTOMapper;
 import thy.repository.TicketRepository;
 import thy.repository.PaymentRepository;
 import thy.repository.FlightSeatRepository;
@@ -30,7 +31,7 @@ public class TicketService {
 
     public List<TicketSummaryDTO> getUserTickets(Long userId) {
         return ticketRepository.findByUserUserId(userId).stream()
-                .map(this::convertToSummary)
+                .map(DTOMapper::toTicketSummaryDTO)
                 .toList();
     }
 
@@ -70,7 +71,7 @@ public class TicketService {
         if (ticket.getStatus() == Ticket.TicketStatus.booked || 
             (ticket.getPayment().getMethod() == Payment.PaymentMethod.card || 
              ticket.getPayment().getMethod() == Payment.PaymentMethod.mile)) {
-            deductEarnedMiles(ticket.getUser(), flightSeat);
+            MilesCalculator.deductMiles(ticket.getUser(), flightSeat, userRepository);
         }
         
         // If user paid with miles, add them back
@@ -91,7 +92,7 @@ public class TicketService {
         refundPayment.setPaidAt(LocalDateTime.now());
         paymentRepository.save(refundPayment);
         
-        return convertToSummary(ticket);
+        return DTOMapper.toTicketSummaryDTO(ticket);
     }
 
     @Transactional
@@ -100,64 +101,6 @@ public class TicketService {
         if (ticket == null) return null;
         ticket.setStatus(Ticket.TicketStatus.checked_in);
         ticketRepository.save(ticket);
-        return convertToSummary(ticket);
-    }
-
-    private TicketSummaryDTO convertToSummary(Ticket t) {
-        return new TicketSummaryDTO(
-                t.getTicketId(),
-                t.getFlightId(),
-                t.getFlight() != null && t.getFlight().getOriginAirport() != null ? t.getFlight().getOriginAirport().getIataCode() : null,
-                t.getFlight() != null && t.getFlight().getDestinationAirport() != null ? t.getFlight().getDestinationAirport().getIataCode() : null,
-                t.getFlight() != null ? t.getFlight().getDepartureTime() : null,
-                t.getFlight() != null ? t.getFlight().getArrivalTime() : null,
-                t.getSeatNumber(),
-                t.getStatus() != null ? t.getStatus().name() : null,
-                t.getHasExtraBaggage(),
-                t.getHasMealService()
-        );
-    }
-
-    /**
-     * Deduct earned miles when a ticket is cancelled
-     * Uses the same formula as earning: price * statusMultiplier / 100
-     */
-    private void deductEarnedMiles(User user, FlightSeat flightSeat) {
-        if (flightSeat.getPrice() != null && flightSeat.getFlight() != null && 
-            flightSeat.getFlight().getPlane() != null) {
-            
-            // Get seat info from Plane's seats
-            Seat seat = flightSeat.getFlight().getPlane().getSeats().stream()
-                .filter(s -> s.getSeatNumber().equals(flightSeat.getSeatNumber()))
-                .findFirst()
-                .orElse(null);
-            
-            if (seat != null && seat.getType() != null) {
-                double price = flightSeat.getPrice().doubleValue();
-                int statusMultiplier = getStatusMultiplier(seat.getType());
-                int milesToDeduct = (int) Math.round((price * statusMultiplier) / 100.0);
-                
-                Integer currentMiles = user.getMile() != null ? user.getMile() : 0;
-                // Ensure miles don't go negative
-                user.setMile(Math.max(0, currentMiles - milesToDeduct));
-                userRepository.save(user);
-            }
-        }
-    }
-
-    /**
-     * Get status multiplier based on seat type
-     * economy: 5
-     * premium_economy: 10
-     * business: 15
-     * first: 20
-     */
-    private int getStatusMultiplier(Seat.SeatType seatType) {
-        return switch (seatType) {
-            case economy -> 5;
-            case premium_economy -> 10;
-            case business -> 15;
-            case first -> 20;
-        };
+        return DTOMapper.toTicketSummaryDTO(ticket);
     }
 }

@@ -10,6 +10,7 @@ import thy.dto.UserDTO;
 import thy.entity.CreditCard;
 import thy.entity.User;
 import thy.entity.User.Gender;
+import thy.util.DTOMapper;
 import thy.repository.UserRepository;
 
 @Service
@@ -23,7 +24,7 @@ public class UserService {
     public UserDTO getUserByEmailOrPhoneNum(String emailOrPhoneNum) {
 
         return userRepository.findByEmailOrPhoneNum(emailOrPhoneNum, emailOrPhoneNum)   // either email or phone number
-            .map(this::convertToUserDTO)
+            .map(DTOMapper::toUserDTO)
             .orElse(null);
     }
 
@@ -60,7 +61,7 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(user);
-        return convertToUserDTO(updatedUser);
+        return DTOMapper.toUserDTO(updatedUser);
     }
 
     @Transactional
@@ -70,7 +71,7 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         userRepository.delete(user);
-        return convertToUserDTO(user);
+        return DTOMapper.toUserDTO(user);
     }
 
     @Transactional
@@ -122,21 +123,5 @@ public class UserService {
         // Update to new password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-    }
-
-    private UserDTO convertToUserDTO(User user) {
-        return new UserDTO(
-            user.getUserId(),
-            user.getFirstName(),
-            user.getMiddleName(),
-            user.getLastName(),
-            user.getDateOfBirth(),
-            user.getGender().name(),
-            user.getNationality(),
-            user.getEmail(),
-            user.getPhoneNum(),
-            user.getUserType().name(),
-            user.getMile()
-        );
     }
 }
