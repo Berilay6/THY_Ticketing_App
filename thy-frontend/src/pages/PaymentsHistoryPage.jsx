@@ -19,6 +19,35 @@ export default function PaymentsHistoryPage() {
     return total;
   };
 
+  const formatDateTime = (dateTime, timezone) => {
+    if (!dateTime || !timezone) return "";
+    const date = new Date(dateTime);
+
+    // Parse timezone string like "UTC+03:00" or "UTC-08:00"
+    const match = timezone.match(/UTC([+-])(\d{2}):(\d{2})/);
+    if (!match) return date.toLocaleString();
+
+    const sign = match[1] === "+" ? 1 : -1;
+    const hours = parseInt(match[2]);
+    const minutes = parseInt(match[3]);
+    const offsetMinutes = sign * (hours * 60 + minutes);
+
+    // Calculate local time with offset
+    const utcTime = date.getTime();
+    const localTime = new Date(utcTime + offsetMinutes * 60000);
+
+    const timeStr = localTime.toLocaleString("en-US", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${timeStr} (${timezone})`;
+  };
+
   const calculatePaymentTotal = (payment) => {
     if (!payment.tickets || payment.tickets.length === 0) {
       return payment.totalAmount || 0;
@@ -85,6 +114,24 @@ export default function PaymentsHistoryPage() {
                       <Typography variant="body2">
                         {ticket.origin} → {ticket.destination} •{" "}
                         {ticket.seatNumber}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "var(--text-muted)",
+                          display: "block",
+                          mt: 0.3,
+                        }}
+                      >
+                        {formatDateTime(
+                          ticket.departureTime,
+                          ticket.originTimezone
+                        )}{" "}
+                        →{" "}
+                        {formatDateTime(
+                          ticket.arrivalTime,
+                          ticket.destinationTimezone
+                        )}
                       </Typography>
                       <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
                         {ticket.hasExtraBaggage && (

@@ -22,6 +22,10 @@ public class DTOMapper {
                 ? ticket.getFlight().getOriginAirport().getIataCode() : null,
             ticket.getFlight() != null && ticket.getFlight().getDestinationAirport() != null
                 ? ticket.getFlight().getDestinationAirport().getIataCode() : null,
+            ticket.getFlight() != null && ticket.getFlight().getOriginAirport() != null
+                ? ticket.getFlight().getOriginAirport().getTimezone() : null,
+            ticket.getFlight() != null && ticket.getFlight().getDestinationAirport() != null
+                ? ticket.getFlight().getDestinationAirport().getTimezone() : null,
             ticket.getFlight() != null ? ticket.getFlight().getDepartureTime() : null,
             ticket.getFlight() != null ? ticket.getFlight().getArrivalTime() : null,
             ticket.getSeatNumber(),
@@ -99,6 +103,8 @@ public class DTOMapper {
             flight.getDestinationAirport() != null ? flight.getDestinationAirport().getIataCode() : null,
             flight.getOriginAirport() != null ? flight.getOriginAirport().getName() : null,
             flight.getDestinationAirport() != null ? flight.getDestinationAirport().getName() : null,
+            flight.getOriginAirport() != null ? flight.getOriginAirport().getTimezone() : null,
+            flight.getDestinationAirport() != null ? flight.getDestinationAirport().getTimezone() : null,
             flight.getDepartureTime(),
             flight.getArrivalTime(),
             flight.getPlane() != null ? flight.getPlane().getModelType() : null

@@ -17,6 +17,8 @@ public class TicketSummaryDTO {
     private Long flightId;
     private String origin;
     private String destination;
+    private String originTimezone;
+    private String destinationTimezone;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String seatNumber;

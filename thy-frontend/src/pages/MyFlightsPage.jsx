@@ -1,4 +1,13 @@
-import { Box, Typography, Paper, Button, Chip, Stack } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Chip,
+  Stack,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 import LuggageIcon from "@mui/icons-material/Luggage";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { useEffect, useState } from "react";
@@ -12,6 +21,7 @@ const MEAL_SERVICE_PRICE = 75;
 export default function MyFlightsPage() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("active"); // "active" shows booked & pending, excludes cancelled
   const userId = localStorage.getItem("userId");
 
   const calculateTicketTotal = (ticket) => {
@@ -19,6 +29,35 @@ export default function MyFlightsPage() {
     if (ticket.hasExtraBaggage) total += EXTRA_BAGGAGE_PRICE;
     if (ticket.hasMealService) total += MEAL_SERVICE_PRICE;
     return total;
+  };
+
+  const formatDateTime = (dateTime, timezone) => {
+    if (!dateTime || !timezone) return "";
+    const date = new Date(dateTime);
+
+    // Parse timezone string like "UTC+03:00" or "UTC-08:00"
+    const match = timezone.match(/UTC([+-])(\d{2}):(\d{2})/);
+    if (!match) return date.toLocaleString();
+
+    const sign = match[1] === "+" ? 1 : -1;
+    const hours = parseInt(match[2]);
+    const minutes = parseInt(match[3]);
+    const offsetMinutes = sign * (hours * 60 + minutes);
+
+    // Calculate local time with offset
+    const utcTime = date.getTime();
+    const localTime = new Date(utcTime + offsetMinutes * 60000);
+
+    const timeStr = localTime.toLocaleString("en-US", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${timeStr} (${timezone})`;
   };
 
   useEffect(() => {
@@ -52,23 +91,67 @@ export default function MyFlightsPage() {
       });
   };
 
+  const handleFilterChange = (event, newFilter) => {
+    if (newFilter !== null) {
+      setStatusFilter(newFilter);
+    }
+  };
+
+  const filteredTickets = tickets.filter((ticket) => {
+    const status = ticket.status?.toLowerCase();
+    if (statusFilter === "active") {
+      return status === "booked" || status === "pending";
+    } else if (statusFilter === "all") {
+      return true;
+    } else {
+      return status === statusFilter;
+    }
+  });
+
   return (
     <Box className="page-root myflights-wrapper">
       <Typography variant="h5" gutterBottom>
         My Flights
       </Typography>
 
+      <ToggleButtonGroup
+        value={statusFilter}
+        exclusive
+        onChange={handleFilterChange}
+        aria-label="ticket status filter"
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="active" aria-label="active tickets">
+          Active
+        </ToggleButton>
+        <ToggleButton value="booked" aria-label="booked tickets">
+          Booked
+        </ToggleButton>
+        <ToggleButton value="pending" aria-label="pending tickets">
+          Pending
+        </ToggleButton>
+        <ToggleButton value="cancelled" aria-label="cancelled tickets">
+          Cancelled
+        </ToggleButton>
+        <ToggleButton value="all" aria-label="all tickets">
+          All
+        </ToggleButton>
+      </ToggleButtonGroup>
+
       {loading ? (
         <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
           Loading tickets...
         </Typography>
-      ) : tickets.length === 0 ? (
+      ) : filteredTickets.length === 0 ? (
         <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
-          You don’t have any tickets yet. Book a flight to see it here.
+          {statusFilter === "active"
+            ? "You don't have any active tickets yet. Book a flight to see it here."
+            : `No ${statusFilter} tickets found.`}
         </Typography>
       ) : (
         <div className="myflights-list">
-          {tickets.map((t) => (
+          {filteredTickets.map((t) => (
             <Paper
               key={t.ticketId}
               elevation={0}
@@ -78,8 +161,16 @@ export default function MyFlightsPage() {
                 <Typography sx={{ fontWeight: 500 }}>
                   {t.origin} → {t.destination}
                 </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "var(--text-muted)", mb: 0.5 }}
+                >
+                  Departure: {formatDateTime(t.departureTime, t.originTimezone)}
+                </Typography>
                 <Typography variant="body2" sx={{ color: "var(--text-muted)" }}>
-                  {t.departureTime?.replace("T", " ")} • Seat: {t.seatNumber}
+                  Arrival:{" "}
+                  {formatDateTime(t.arrivalTime, t.destinationTimezone)} • Seat:{" "}
+                  {t.seatNumber}
                 </Typography>
 
                 <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
