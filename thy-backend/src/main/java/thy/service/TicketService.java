@@ -61,7 +61,7 @@ public class TicketService {
         
         // Mark seat as available again
         flightSeat.setAvailability(FlightSeat.Availability.available);
-        flightSeatRepository.save(flightSeat);
+        flightSeatRepository.saveAndFlush(flightSeat);
         
         // Update ticket status to cancelled
         ticket.setStatus(Ticket.TicketStatus.cancelled);

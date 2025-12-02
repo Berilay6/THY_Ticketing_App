@@ -111,6 +111,7 @@ public class PaymentService {
             // Mark seats as sold for card payments
             for (FlightSeat fs : seatsToUpdate) {
                 fs.setAvailability(FlightSeat.Availability.sold);
+                flightSeatRepository.saveAndFlush(fs);
             }
             // Award miles to user based on seat type
             MilesCalculator.awardMiles(user, seatsToUpdate, userRepository);
@@ -127,6 +128,7 @@ public class PaymentService {
             // Mark seats as sold for mile payments
             for (FlightSeat fs : seatsToUpdate) {
                 fs.setAvailability(FlightSeat.Availability.sold);
+                flightSeatRepository.saveAndFlush(fs);
             }
             // Award miles to user based on seat type (even for mile payments)
             MilesCalculator.awardMiles(user, seatsToUpdate, userRepository);
@@ -134,6 +136,7 @@ public class PaymentService {
             // Mark seats as reserved for cash payments (pending)
             for (FlightSeat fs : seatsToUpdate) {
                 fs.setAvailability(FlightSeat.Availability.reserved);
+                flightSeatRepository.saveAndFlush(fs);
             }
         }
 
