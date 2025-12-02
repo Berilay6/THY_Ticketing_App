@@ -26,7 +26,6 @@ export const endpoints = {
   tickets: {
     userTickets: (userId) => `${BASE}/tickets/user/${userId}`,
     cancel: (ticketId) => `${BASE}/tickets/${ticketId}/cancel`,
-    checkin: (ticketId) => `${BASE}/tickets/${ticketId}/checkin`,
   },
 };
 

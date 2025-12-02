@@ -165,7 +165,7 @@ CREATE TABLE Ticket (
     issue_time         TIMESTAMP     NOT NULL,
     flight_id          BIGINT UNSIGNED NOT NULL,
     seat_number        VARCHAR(3)   NOT NULL,
-    status             ENUM('booked','cancelled','checked_in','completed','pending') 
+    status             ENUM('booked','cancelled','completed','pending') 
                       NOT NULL DEFAULT 'booked',
     has_extra_baggage  BOOLEAN      NOT NULL DEFAULT 0,
     has_meal_service   BOOLEAN      NOT NULL DEFAULT 0,

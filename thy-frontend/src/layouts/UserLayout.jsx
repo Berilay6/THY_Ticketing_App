@@ -22,8 +22,6 @@ import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ShoppingBasketOutlinedIcon from "@mui/icons-material/ShoppingBasketOutlined";
-import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import "../styles/layout.css";
@@ -43,11 +41,6 @@ const menuItems = [
   },
   { label: "Book Flight", path: "/book-flight", icon: <SearchOutlinedIcon /> },
   { label: "Basket", path: "/basket", icon: <ShoppingBasketOutlinedIcon /> },
-  {
-    label: "Check-in",
-    path: "/check-in",
-    icon: <AssignmentTurnedInOutlinedIcon />,
-  },
 ];
 
 export default function UserLayout() {

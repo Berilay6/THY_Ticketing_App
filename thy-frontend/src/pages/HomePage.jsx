@@ -55,10 +55,10 @@ export default function HomePage() {
         <Paper elevation={0} className="card">
           <div className="card-header">Already have a ticket?</div>
           <p className="card-text-muted">
-            Check-in online and see your upcoming flights.
+            View and manage your booked flights.
           </p>
-          <Button variant="outlined" onClick={() => navigate("/check-in")}>
-            Check-in
+          <Button variant="outlined" onClick={() => navigate("/my-flights")}>
+            My Flights
           </Button>
         </Paper>
       </div>

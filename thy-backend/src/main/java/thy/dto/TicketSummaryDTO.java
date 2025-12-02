@@ -22,7 +22,7 @@ public class TicketSummaryDTO {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
     private String seatNumber;
-    private String status; // booked/cancelled/checked_in/completed
+    private String status; // booked/cancelled/completed/pending
     private Boolean hasExtraBaggage;
     private Boolean hasMealService;
     private BigDecimal price; // Base seat price

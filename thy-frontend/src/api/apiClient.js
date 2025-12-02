@@ -101,8 +101,6 @@ export const ticketApi = {
   getUserTickets: (userId) => fetchJson(endpoints.tickets.userTickets(userId)),
   cancelTicket: (ticketId) =>
     fetchJson(endpoints.tickets.cancel(ticketId), { method: "POST" }),
-  checkInTicket: (ticketId) =>
-    fetchJson(endpoints.tickets.checkin(ticketId), { method: "POST" }),
 };
 
 export default { flightApi, userApi, paymentApi, ticketApi };
