@@ -36,7 +36,6 @@ public class Seat {
 
     public enum SeatStatus {
         active,
-        broken,
         unavailable
     }
 

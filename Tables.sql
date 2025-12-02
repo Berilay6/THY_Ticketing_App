@@ -71,7 +71,6 @@ CREATE TABLE Flight (
     destination_airport_id BIGINT UNSIGNED NOT NULL,
     departure_time         TIMESTAMP       NOT NULL,
     arrival_time           TIMESTAMP       NOT NULL,
-    flight_duration_min    INT UNSIGNED NULL,
     plane_id               BIGINT UNSIGNED NOT NULL,
     
     PRIMARY KEY (flight_id),
@@ -102,7 +101,7 @@ CREATE TABLE Seat (
     plane_id    BIGINT UNSIGNED NOT NULL,
     seat_number VARCHAR(3)      NOT NULL,
     type        ENUM('economy','premium_economy','business','first') NOT NULL,
-    status      ENUM('active','broken','unavailable') NOT NULL DEFAULT 'active',
+    status      ENUM('active','unavailable') NOT NULL DEFAULT 'active',
     
     PRIMARY KEY (plane_id, seat_number),
     CONSTRAINT seat_domain CHECK (seat_number REGEXP '^[1-9][0-9]{0,1}[A-Z]$'),

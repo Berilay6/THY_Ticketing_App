@@ -25,9 +25,6 @@ public class Flight {
 
     @Column(name = "arrival_time", nullable = false)
     private LocalDateTime arrivalTime;
-
-    @Column(name = "flight_duration_min")
-    private Integer flightDurationMin;
     
     @ManyToOne
     @JoinColumn(name = "origin_airport_id", nullable = false)
