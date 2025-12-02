@@ -141,7 +141,23 @@ export default function PaymentPage() {
       })
       .catch((err) => {
         console.error("Payment failed:", err);
-        alert(err.payload?.message || "Payment failed. Please try again.");
+        const errorMessage =
+          err.payload?.message ||
+          err.message ||
+          "Payment failed. Please try again.";
+        alert(errorMessage);
+
+        // If seat is already booked, clear basket and redirect to book flight
+        if (
+          errorMessage.includes("already booked") ||
+          errorMessage.includes("Seat")
+        ) {
+          completePayment(); // This clears the basket
+          alert(
+            "Some seats are no longer available. Please select your seats again."
+          );
+          navigate("/book-flight");
+        }
       })
       .finally(() => setLoading(false));
   };

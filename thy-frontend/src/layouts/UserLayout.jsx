@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useBooking } from "../context/BookingContext";
 
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -48,6 +49,7 @@ export default function UserLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
+  const { clearBasket } = useBooking();
 
   useEffect(() => {
     const updateUserName = () => {
@@ -82,6 +84,7 @@ export default function UserLayout() {
   };
 
   const handleLogout = () => {
+    clearBasket();
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("userEmail");

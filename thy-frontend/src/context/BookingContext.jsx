@@ -9,8 +9,13 @@ export function BookingProvider({ children }) {
     setBasket((prev) => [...prev, flight]);
   };
 
-  const removeFromBasket = (flightId) => {
-    setBasket((prev) => prev.filter((f) => (f.flightId ?? f.id) !== flightId));
+  const removeFromBasket = (flightId, seatNumber) => {
+    setBasket((prev) =>
+      prev.filter(
+        (f) =>
+          !((f.flightId ?? f.id) === flightId && f.seatNumber === seatNumber)
+      )
+    );
   };
 
   const clearBasket = () => setBasket([]);
