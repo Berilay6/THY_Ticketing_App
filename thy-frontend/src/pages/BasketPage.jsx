@@ -98,7 +98,9 @@ export default function BasketPage() {
                   </Typography>
                 </Box>
                 <IconButton
-                  onClick={() => removeFromBasket(item.flightId ?? item.id)}
+                  onClick={() =>
+                    removeFromBasket(item.flightId ?? item.id, item.seatNumber)
+                  }
                 >
                   <DeleteOutlineIcon />
                 </IconButton>
