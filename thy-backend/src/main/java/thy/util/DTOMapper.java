@@ -27,7 +27,8 @@ public class DTOMapper {
             ticket.getSeatNumber(),
             ticket.getStatus() != null ? ticket.getStatus().name() : null,
             ticket.getHasExtraBaggage(),
-            ticket.getHasMealService()
+            ticket.getHasMealService(),
+            ticket.getFlightSeat() != null ? ticket.getFlightSeat().getPrice() : null
         );
     }
 

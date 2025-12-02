@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,4 +23,5 @@ public class TicketSummaryDTO {
     private String status; // booked/cancelled/checked_in/completed
     private Boolean hasExtraBaggage;
     private Boolean hasMealService;
+    private BigDecimal price; // Base seat price
 }

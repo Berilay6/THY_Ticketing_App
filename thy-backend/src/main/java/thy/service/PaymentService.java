@@ -29,6 +29,10 @@ import thy.repository.CreditCardRepository;
 @RequiredArgsConstructor
 public class PaymentService {
     
+    // Extra service pricing constants
+    private static final BigDecimal EXTRA_BAGGAGE_PRICE = new BigDecimal("150.00"); // 150 TL
+    private static final BigDecimal MEAL_SERVICE_PRICE = new BigDecimal("75.00");    // 75 TL
+    
     private final PaymentRepository paymentRepository;
     private final TicketRepository ticketRepository;
     private final FlightSeatRepository flightSeatRepository;
@@ -68,6 +72,14 @@ public class PaymentService {
             
             if (flightSeat.getPrice() != null) {
                 total = total.add(flightSeat.getPrice());
+            }
+            
+            // Add extra service fees
+            if (Boolean.TRUE.equals(t.getHasExtraBaggage())) {
+                total = total.add(EXTRA_BAGGAGE_PRICE);
+            }
+            if (Boolean.TRUE.equals(t.getHasMealService())) {
+                total = total.add(MEAL_SERVICE_PRICE);
             }
             
             seatsToUpdate.add(flightSeat);
