@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [miles, setMiles] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [oldPassword, setOldPassword] = useState("");
@@ -62,6 +63,7 @@ export default function ProfilePage() {
           setLastName(user.lastName || "");
           setEmail(user.email || "");
           setPhone(user.phoneNum || "");
+          setMiles(user.mile || 0);
         }
       })
       .catch((err) => {
@@ -226,7 +228,7 @@ export default function ProfilePage() {
         Profile
       </Typography>
 
-      <Paper elevation={0} className="card">
+      <Paper elevation={0} className="card" sx={{ mt: 3 }}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>
           Personal information
         </Typography>
@@ -259,6 +261,29 @@ export default function ProfilePage() {
             {loading ? "Updating..." : "Update"}
           </Button>
         </Stack>
+      </Paper>
+
+      <Paper elevation={0} className="card">
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>
+          Miles Balance
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 3,
+            backgroundColor: "#f5f5f5",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h4" color="primary" fontWeight="bold">
+            {miles.toLocaleString()}
+          </Typography>
+          <Typography variant="h6" sx={{ ml: 1 }} color="text.secondary">
+            Miles
+          </Typography>
+        </Box>
       </Paper>
 
       <Paper elevation={0} className="card" sx={{ mt: 3 }}>

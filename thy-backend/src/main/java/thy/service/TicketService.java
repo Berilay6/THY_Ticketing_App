@@ -8,6 +8,7 @@ import thy.entity.Ticket;
 import thy.entity.Payment;
 import thy.entity.FlightSeat;
 import thy.entity.User;
+import thy.entity.Seat;
 import thy.repository.TicketRepository;
 import thy.repository.PaymentRepository;
 import thy.repository.FlightSeatRepository;
@@ -65,6 +66,13 @@ public class TicketService {
         ticket.setStatus(Ticket.TicketStatus.cancelled);
         ticketRepository.save(ticket);
         
+        // Deduct earned miles if ticket was booked (not pending/cash)
+        if (ticket.getStatus() == Ticket.TicketStatus.booked || 
+            (ticket.getPayment().getMethod() == Payment.PaymentMethod.card || 
+             ticket.getPayment().getMethod() == Payment.PaymentMethod.mile)) {
+            deductEarnedMiles(ticket.getUser(), flightSeat);
+        }
+        
         // If user paid with miles, add them back
         if (ticket.getPayment().getMethod() == Payment.PaymentMethod.mile) {
             User user = ticket.getUser();
@@ -108,5 +116,48 @@ public class TicketService {
                 t.getHasExtraBaggage(),
                 t.getHasMealService()
         );
+    }
+
+    /**
+     * Deduct earned miles when a ticket is cancelled
+     * Uses the same formula as earning: price * statusMultiplier / 100
+     */
+    private void deductEarnedMiles(User user, FlightSeat flightSeat) {
+        if (flightSeat.getPrice() != null && flightSeat.getFlight() != null && 
+            flightSeat.getFlight().getPlane() != null) {
+            
+            // Get seat info from Plane's seats
+            Seat seat = flightSeat.getFlight().getPlane().getSeats().stream()
+                .filter(s -> s.getSeatNumber().equals(flightSeat.getSeatNumber()))
+                .findFirst()
+                .orElse(null);
+            
+            if (seat != null && seat.getType() != null) {
+                double price = flightSeat.getPrice().doubleValue();
+                int statusMultiplier = getStatusMultiplier(seat.getType());
+                int milesToDeduct = (int) Math.round((price * statusMultiplier) / 100.0);
+                
+                Integer currentMiles = user.getMile() != null ? user.getMile() : 0;
+                // Ensure miles don't go negative
+                user.setMile(Math.max(0, currentMiles - milesToDeduct));
+                userRepository.save(user);
+            }
+        }
+    }
+
+    /**
+     * Get status multiplier based on seat type
+     * economy: 5
+     * premium_economy: 10
+     * business: 15
+     * first: 20
+     */
+    private int getStatusMultiplier(Seat.SeatType seatType) {
+        return switch (seatType) {
+            case economy -> 5;
+            case premium_economy -> 10;
+            case business -> 15;
+            case first -> 20;
+        };
     }
 }

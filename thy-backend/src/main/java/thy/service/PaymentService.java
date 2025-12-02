@@ -17,6 +17,7 @@ import thy.entity.Ticket;
 import thy.entity.FlightSeat;
 import thy.entity.User;
 import thy.entity.CreditCard;
+import thy.entity.Seat;
 import thy.repository.PaymentRepository;
 import thy.repository.TicketRepository;
 import thy.repository.FlightSeatRepository;
@@ -40,6 +41,7 @@ public class PaymentService {
             .map(this::convertToPaymentResultDTO)
             .toList();
     }
+    
     @Transactional
     public List<PaymentResultDTO> createPayment(PaymentRequestDTO paymentRequestDTO) {
         User user = userRepository.findById(paymentRequestDTO.getUserId())
@@ -109,6 +111,8 @@ public class PaymentService {
             for (FlightSeat fs : seatsToUpdate) {
                 fs.setAvailability(FlightSeat.Availability.sold);
             }
+            // Award miles to user based on seat type
+            awardMilesForSeats(user, seatsToUpdate);
         } else if ("mile".equals(method)) {
             // Check if user has enough miles
             Integer userMiles = user.getMile() != null ? user.getMile() : 0;
@@ -123,6 +127,8 @@ public class PaymentService {
             for (FlightSeat fs : seatsToUpdate) {
                 fs.setAvailability(FlightSeat.Availability.sold);
             }
+            // Award miles to user based on seat type (even for mile payments)
+            awardMilesForSeats(user, seatsToUpdate);
         } else if ("cash".equals(method)) {
             // Mark seats as reserved for cash payments (pending)
             for (FlightSeat fs : seatsToUpdate) {
@@ -194,5 +200,54 @@ public class PaymentService {
             null,
             null
         );
+    }
+
+    /**
+     * Award miles to user based on seat types and prices
+     * Formula: price * statusMultiplier / 100
+     */
+    private void awardMilesForSeats(User user, List<FlightSeat> seats) {
+        int totalMilesToAward = 0;
+        
+        for (FlightSeat fs : seats) {
+            if (fs.getPrice() != null && fs.getFlight() != null && 
+                fs.getFlight().getPlane() != null) {
+                
+                // Get seat info from Plane's seats
+                Seat seat = fs.getFlight().getPlane().getSeats().stream()
+                    .filter(s -> s.getSeatNumber().equals(fs.getSeatNumber()))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (seat != null && seat.getType() != null) {
+                    double price = fs.getPrice().doubleValue();
+                    int statusMultiplier = getStatusMultiplier(seat.getType());
+                    int milesForThisSeat = (int) Math.round((price * statusMultiplier) / 100.0);
+                    totalMilesToAward += milesForThisSeat;
+                }
+            }
+        }
+        
+        if (totalMilesToAward > 0) {
+            Integer currentMiles = user.getMile() != null ? user.getMile() : 0;
+            user.setMile(currentMiles + totalMilesToAward);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * Get status multiplier based on seat type
+     * economy: 10
+     * premium_economy: 25
+     * business: 50
+     * first: 100
+     */
+    private int getStatusMultiplier(Seat.SeatType seatType) {
+        return switch (seatType) {
+            case economy -> 5;
+            case premium_economy -> 10;
+            case business -> 15;
+            case first -> 20;
+        };
     }
 }

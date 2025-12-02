@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 @Entity
 @Table(name = "Plane") 
@@ -34,4 +35,7 @@ public class Plane {
 	@ManyToOne
 	@JoinColumn(name = "airport_id")
 	private Airport airport;
+
+	@OneToMany(mappedBy = "plane")
+	private List<Seat> seats;
 }
