@@ -6,7 +6,19 @@ export function BookingProvider({ children }) {
   const [basket, setBasket] = useState([]); // holds flight search results added to basket
 
   const addToBasket = (flight) => {
+    // Check if this exact seat is already in basket
+    const isDuplicate = basket.some(
+      (item) =>
+        (item.flightId ?? item.id) === (flight.flightId ?? flight.id) &&
+        item.seatNumber === flight.seatNumber
+    );
+
+    if (isDuplicate) {
+      return false; // Indicate that item was not added
+    }
+
     setBasket((prev) => [...prev, flight]);
+    return true; // Indicate success
   };
 
   const removeFromBasket = (flightId, seatNumber) => {

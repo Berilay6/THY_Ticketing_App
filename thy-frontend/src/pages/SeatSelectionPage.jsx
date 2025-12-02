@@ -69,8 +69,12 @@ export default function SeatSelectionPage() {
       hasMealService: hasMealService,
     };
 
-    addToBasket(basketItem);
-    navigate("/basket");
+    const added = addToBasket(basketItem);
+    if (added) {
+      navigate("/basket");
+    } else {
+      alert("This seat is already in your basket!");
+    }
   };
 
   const getSeatColor = (seat) => {
