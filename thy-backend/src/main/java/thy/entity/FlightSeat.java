@@ -40,4 +40,8 @@ public class FlightSeat {
     @ManyToOne
     @JoinColumn(name = "flight_id", insertable = false, updatable = false)
     private Flight flight;
+
+    // to avoid race condition
+    @Version
+    private long version;
 }

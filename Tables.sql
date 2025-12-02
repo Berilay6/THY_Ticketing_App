@@ -220,3 +220,11 @@ CREATE TABLE User_CreditCard(
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+-- Add version column for concurreny
+
+ALTER TABLE FlightSeat 
+ADD COLUMN version INT NOT NULL DEFAULT 0;
+
+ALTER TABLE User
+ADD COLUMN version INT NOT NULL DEFAULT 0;

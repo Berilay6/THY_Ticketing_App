@@ -78,4 +78,8 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "card_id")
     )
     private List<CreditCard> creditCards = new ArrayList<>();
+
+    // to aviod race condition
+    @Version
+    private Integer version;
 }

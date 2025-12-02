@@ -17,11 +17,15 @@ public class PaymentController {
 
 	private final PaymentService paymentService;
 
-	@PostMapping
-	public ResponseEntity<List<PaymentResultDTO>> createPayment(@RequestBody PaymentRequestDTO req) {
-		List<PaymentResultDTO> result = paymentService.createPayment(req);
-		return ResponseEntity.status(HttpStatus.CREATED).body(result);
-	}
+	public ResponseEntity<?> createPayment(@RequestBody PaymentRequestDTO req) {
+    try {
+        List<PaymentResultDTO> result = paymentService.createPayment(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("The seat you chose is not available");
+    }
+}
 
 	// Get payment history for a user
 	@GetMapping("/user/{userId}")
