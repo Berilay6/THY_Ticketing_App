@@ -33,4 +33,11 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    List<Flight> findByPlanePlaneId(Long planeId);
+
+    List<Flight> findByOriginAirportAirportIdOrDestinationAirportAirportId(
+            Long originAirportId,
+            Long destinationAirportId
+    );
 }

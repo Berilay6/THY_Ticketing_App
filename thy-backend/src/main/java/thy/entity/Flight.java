@@ -25,6 +25,17 @@ public class Flight {
 
     @Column(name = "arrival_time", nullable = false)
     private LocalDateTime arrivalTime;
+
+    public enum FlightStatus {
+        SCHEDULED,
+                ACTIVE,
+                COMPLETED,
+                CANCELLED
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name= "status", nullable=false)
+    private FlightStatus status = FlightStatus. SCHEDULED;
     
     @ManyToOne
     @JoinColumn(name = "origin_airport_id", nullable = false)
