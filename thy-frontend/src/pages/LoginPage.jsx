@@ -35,7 +35,14 @@ export default function LoginPage() {
           "userName",
           `${response.firstName} ${response.lastName}`
         );
-        navigate("/");
+        localStorage.setItem("userType", response.userType);
+
+        // Kullanıcı tipine göre yönlendirme
+        if (response.userType === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       })
       .catch((err) => {
         console.error("Login failed:", err);

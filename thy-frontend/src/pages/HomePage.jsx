@@ -12,7 +12,9 @@ export default function HomePage() {
       const userName = localStorage.getItem("userName");
       if (userName) {
         const firstName = userName.split(" ")[0];
-        setGreeting(`Welcome, ${firstName}`);
+        const formattedName =
+          firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+        setGreeting(`Welcome, ${formattedName}`);
       } else {
         setGreeting("Welcome");
       }

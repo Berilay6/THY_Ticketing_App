@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // İkonlar
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -36,8 +36,15 @@ const adminMenuItems = [
 
 export default function AdminLayout() {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [adminName, setAdminName] = useState("");
   const navigate = useNavigate();
-  const adminName = "Admin";
+
+  useEffect(() => {
+    const name = localStorage.getItem("userName");
+    if (name) {
+      setAdminName(name);
+    }
+  }, []);
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -50,7 +57,6 @@ export default function AdminLayout() {
 
   return (
     <Box className="app-root">
-
       <Drawer
         variant="permanent"
         PaperProps={{ className: "app-sidebar-paper" }}
@@ -77,7 +83,6 @@ export default function AdminLayout() {
       <Box className="app-main">
         <AppBar position="fixed" elevation={0} className="app-appbar">
           <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FlightTakeoffIcon sx={{ color: "var(--primary)" }} />
               <Typography variant="h6"></Typography>
@@ -99,7 +104,6 @@ export default function AdminLayout() {
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </Box>
-
           </Toolbar>
         </AppBar>
 
