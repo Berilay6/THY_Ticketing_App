@@ -72,7 +72,8 @@ CREATE TABLE Flight (
     departure_time         TIMESTAMP       NOT NULL,
     arrival_time           TIMESTAMP       NOT NULL,
     plane_id               BIGINT UNSIGNED NOT NULL,
-    
+    status                ENUM('SCHEDULED', 'ACTIVE', 'COMPLETED','CANCELLED') 
+                           NOT NULL DEFAULT 'SCHEDULED',
     PRIMARY KEY (flight_id),
     CONSTRAINT flight_origin_airport
         FOREIGN KEY (origin_airport_id)
@@ -228,3 +229,44 @@ ADD COLUMN version INT NOT NULL DEFAULT 0;
 
 ALTER TABLE User
 ADD COLUMN version INT NOT NULL DEFAULT 0;
+
+
+-- ============================================
+-- INDEXES FOR PERFORMANCE OPTIMIZATION
+-- ============================================
+
+-- User table: Login ve authentication için
+CREATE INDEX idx_user_email ON `User`(email);
+CREATE INDEX idx_user_phone ON `User`(phone_num);
+
+-- Airport table: City/Country aramaları için
+CREATE INDEX idx_airport_iata ON Airport(iata_code);
+CREATE INDEX idx_airport_city ON Airport(city);
+CREATE INDEX idx_airport_country ON Airport(country);
+
+-- Flight table: En kritik aramalar burada
+-- Origin ve destination airport'a göre uçuş arama (en sık kullanılan)
+CREATE INDEX idx_flight_origin_dest ON Flight(origin_airport_id, destination_airport_id);
+-- Tarih bazlı aramalar için
+CREATE INDEX idx_flight_departure ON Flight(departure_time);
+-- Plane'e göre uçuş sorgulama
+CREATE INDEX idx_flight_plane ON Flight(plane_id);
+-- Status'e göre filtreleme
+CREATE INDEX idx_flight_status ON Flight(status);
+
+-- FlightSeat table: Uçuştaki koltuk sorguları
+CREATE INDEX idx_flightseat_flight ON FlightSeat(flight_id);
+CREATE INDEX idx_flightseat_availability ON FlightSeat(flight_id, availability);
+
+-- Ticket table: Kullanıcı biletleri sorgusu (çok sık)
+CREATE INDEX idx_ticket_user ON Ticket(user_id);
+CREATE INDEX idx_ticket_payment ON Ticket(payment_id);
+CREATE INDEX idx_ticket_flight ON Ticket(flight_id);
+
+-- Payment table: Kullanıcı ödeme geçmişi
+CREATE INDEX idx_payment_user ON Payment(user_id);
+CREATE INDEX idx_payment_status ON Payment(status);
+
+-- Plane table: Airport'a göre plane sorguları
+CREATE INDEX idx_plane_airport ON Plane(airport_id);
+CREATE INDEX idx_plane_status ON Plane(status);
