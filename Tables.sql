@@ -235,10 +235,6 @@ ADD COLUMN version INT NOT NULL DEFAULT 0;
 -- INDEXES FOR PERFORMANCE OPTIMIZATION
 -- ============================================
 
--- User table: Login ve authentication için
-CREATE INDEX idx_user_email ON `User`(email);
-CREATE INDEX idx_user_phone ON `User`(phone_num);
-
 -- Airport table: City/Country aramaları için
 CREATE INDEX idx_airport_iata ON Airport(iata_code);
 CREATE INDEX idx_airport_city ON Airport(city);
