@@ -24,7 +24,12 @@ public class PlaneService {
     // Koltuk yaratma işini devredeceğimiz servis
     private final SeatService seatService;
 
-
+    /**
+     * Get all planes from the database
+     */
+    public List<Plane> getAllPlanes() {
+        return planeRepository.findAll();
+    }
 
     @Transactional
     public String reportMalfunction(Long planeId, boolean isRetired) {
