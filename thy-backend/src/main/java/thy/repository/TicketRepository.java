@@ -39,5 +39,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByFlightId(Long flightId);
 
     long countByFlightIdAndStatus(Long flightId, TicketStatus status);
+    
+    // Belirli uçuşa ait tüm biletleri sil
+    void deleteByFlightId(Long flightId);
 }
 

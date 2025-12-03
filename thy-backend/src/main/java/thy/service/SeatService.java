@@ -92,6 +92,10 @@ public class SeatService {
         seatRepository.saveAll(seats);
     }
 
+    public List<Seat> getSeatsByPlaneId(Long planeId) {
+        return seatRepository.findByPlaneId(planeId);
+    }
+
     @Transactional
     public Seat updateSeatStatus(Long planeId, String seatNumber) {
 

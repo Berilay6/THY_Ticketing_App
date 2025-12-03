@@ -21,8 +21,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FlightSeatService {
 
-    private static final BigDecimal BUSINESS_MULTIPLIER = new BigDecimal("2.5");
     private static final BigDecimal ECONOMY_MULTIPLIER = new BigDecimal("1.0");
+    private static final BigDecimal PREMIUM_ECONOMY_MULTIPLIER = new BigDecimal("1.5");
+    private static final BigDecimal BUSINESS_MULTIPLIER = new BigDecimal("2.0");
+    private static final BigDecimal FIRST_MULTIPLIER = new BigDecimal("3.0");
 
     private final FlightSeatRepository flightSeatRepository;
     private final SeatRepository seatRepository;
@@ -141,11 +143,23 @@ public class FlightSeatService {
             BigDecimal baseTotal = basePricePerHour.multiply(BigDecimal.valueOf(durationHours));
 
             // Koltuk tipine göre çarpan uygula
-            if (template.getType() == SeatType.business) {
-                fs.setPrice(baseTotal.multiply(BUSINESS_MULTIPLIER));
-            } else {
-                fs.setPrice(baseTotal.multiply(ECONOMY_MULTIPLIER));
+            BigDecimal multiplier;
+            switch (template.getType()) {
+                case first:
+                    multiplier = FIRST_MULTIPLIER;
+                    break;
+                case business:
+                    multiplier = BUSINESS_MULTIPLIER;
+                    break;
+                case premium_economy:
+                    multiplier = PREMIUM_ECONOMY_MULTIPLIER;
+                    break;
+                case economy:
+                default:
+                    multiplier = ECONOMY_MULTIPLIER;
+                    break;
             }
+            fs.setPrice(baseTotal.multiply(multiplier));
 
             flightSeatsToSave.add(fs);
         }

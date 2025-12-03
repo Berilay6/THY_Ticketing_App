@@ -10,7 +10,7 @@ import {
   TableRow,
   Chip,
   Button,
-  IconButton, // View butonu için
+  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -19,27 +19,78 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stack
+  Stack,
+  CircularProgress,
+  Alert,
+  TextField
 } from "@mui/material";
-import { Warehouse, FlightTakeoff, Visibility } from "@mui/icons-material"; // Visibility (Göz) eklendi
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Yönlendirme için
-
-// Mock Veriler
-const MOCK_STORAGE = [
-  { planeId: 101, modelType: "Boeing 737 Max", status: "maintenance", note: "Engine check required" },
-  { planeId: 102, modelType: "Airbus A320", status: "retired", note: "Waiting for disposal" },
-  { planeId: 105, modelType: "Boeing 777", status: "active", note: "Ready for deployment" },
-];
+import { Warehouse, FlightTakeoff, Visibility, Flight } from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function StoragePage() {
-  const navigate = useNavigate(); // Hook
-  const [storagePlanes, setStoragePlanes] = useState(MOCK_STORAGE);
+  const navigate = useNavigate();
+  const [storagePlanes, setStoragePlanes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [airports, setAirports] = useState([]);
 
   // Deploy Dialog State
   const [openAssign, setOpenAssign] = useState(false);
   const [selectedPlane, setSelectedPlane] = useState(null);
   const [targetAirport, setTargetAirport] = useState("");
+
+  // Add Plane Dialog State
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [newPlaneModel, setNewPlaneModel] = useState("");
+
+  // Fetch planes and filter storage planes (where airportName is "Storage")
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all planes
+        console.log("Attempting to fetch planes from http://localhost:8080/api/admin/planes");
+        const planesResponse = await fetch("http://localhost:8080/api/admin/planes");
+        console.log("Planes fetch response status:", planesResponse.status);
+        
+        if (!planesResponse.ok) {
+          const text = await planesResponse.text();
+          throw new Error(`HTTP ${planesResponse.status}: ${text}`);
+        }
+        
+        const planesData = await planesResponse.json();
+        console.log("Planes data:", planesData);
+        
+        // Filter only planes in storage (airportName === "Storage")
+        const storage = planesData.filter(p => p.airportName === "Storage");
+        setStoragePlanes(storage);
+        
+        // Fetch airports for deploy dialog
+        console.log("Attempting to fetch airports from http://localhost:8080/api/admin/airports");
+        const airportsResponse = await fetch("http://localhost:8080/api/admin/airports");
+        
+        if (!airportsResponse.ok) {
+          const text = await airportsResponse.text();
+          throw new Error(`HTTP ${airportsResponse.status}: ${text}`);
+        }
+        
+        const airportsData = await airportsResponse.json();
+        console.log("Airports data:", airportsData);
+        setAirports(Array.isArray(airportsData) ? airportsData : []);
+        
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching data:", err.message);
+        setError(err.message);
+        setStoragePlanes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -52,27 +103,118 @@ export default function StoragePage() {
 
   const handleOpenAssign = (plane) => {
     setSelectedPlane(plane);
+    setTargetAirport("");
     setOpenAssign(true);
   };
 
-  const handleAssign = () => {
-    setStoragePlanes(storagePlanes.filter(p => p.planeId !== selectedPlane.planeId));
-    setOpenAssign(false);
-    alert(`Plane #${selectedPlane.planeId} deployed successfully!`);
+  const handleAssign = async () => {
+    if (!targetAirport) {
+      alert("Please select an airport");
+      return;
+    }
+
+    try {
+      console.log(`Deploying plane ${selectedPlane.planeId} to airport ${targetAirport}`);
+      console.log(`Plane status: ${selectedPlane.status}`);
+      
+      const response = await fetch(
+        `http://localhost:8080/api/admin/planes/${selectedPlane.planeId}/airport/${targetAirport}`,
+        {
+          method: 'PUT'
+        }
+      );
+
+      console.log("Deploy response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Deploy error response:", errorText);
+        throw new Error(errorText || 'Failed to deploy plane');
+      }
+
+      const result = await response.text();
+      console.log("Deploy success:", result);
+      alert(result);
+      
+      // Remove plane from storage list and close dialog
+      setStoragePlanes(storagePlanes.filter(p => p.planeId !== selectedPlane.planeId));
+      setOpenAssign(false);
+      setSelectedPlane(null);
+      setTargetAirport("");
+    } catch (err) {
+      console.error("Error deploying plane:", err);
+      alert("Failed to deploy plane: " + err.message);
+    }
   };
+
+  const handleAddPlane = async () => {
+    if (!newPlaneModel) {
+      alert("Please enter a plane model");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/admin/planes", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          modelType: newPlaneModel,
+          airportId: null
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to add plane');
+      }
+
+      const result = await response.text();
+      alert(result);
+
+      // Refresh planes list
+      const planesResponse = await fetch("http://localhost:8080/api/admin/planes");
+      if (planesResponse.ok) {
+        const planesData = await planesResponse.json();
+        const storage = planesData.filter(p => p.airportName === "Storage");
+        setStoragePlanes(storage);
+      }
+
+      setOpenAddDialog(false);
+      setNewPlaneModel("");
+    } catch (err) {
+      console.error("Error adding plane:", err);
+      alert("Failed to add plane: " + err.message);
+    }
+  };
+
+
 
   return (
     <Box className="page-root">
 
       {/* BAŞLIK */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Warehouse fontSize="large" color="action" />
-        <Box>
-          <Typography variant="h5" fontWeight="bold">Storage Inventory</Typography>
-          <Typography variant="body2" color="text.secondary">
-            List of planes currently in the hangar or storage.
-          </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Warehouse fontSize="large" color="action" />
+          <Box>
+            <Typography variant="h5" fontWeight="bold">Storage Inventory</Typography>
+            <Typography variant="body2" color="text.secondary">
+              List of planes currently in the hangar or storage.
+            </Typography>
+          </Box>
         </Box>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant="contained" 
+            color="primary"
+            startIcon={<Flight />}
+            onClick={() => setOpenAddDialog(true)}
+          >
+            Add Plane
+          </Button>
+        </Stack>
       </Box>
 
       {/* TABLO */}
@@ -164,9 +306,11 @@ export default function StoragePage() {
               label="Destination Airport"
               onChange={(e) => setTargetAirport(e.target.value)}
             >
-              <MenuItem value="IST">Istanbul (IST)</MenuItem>
-              <MenuItem value="ESB">Ankara (ESB)</MenuItem>
-              <MenuItem value="LHR">London (LHR)</MenuItem>
+              {airports.map((airport) => (
+                <MenuItem key={airport.airportId} value={airport.airportId}>
+                  {airport.name} ({airport.iataCode})
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </DialogContent>
@@ -174,6 +318,32 @@ export default function StoragePage() {
           <Button onClick={() => setOpenAssign(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleAssign} disabled={!targetAirport}>
             Confirm Deploy
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ADD PLANE DIALOG */}
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add New Plane to Storage</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Add a new plane to storage. It will be created with active status and no airport assignment.
+          </Typography>
+          <TextField
+            label="Plane Model"
+            placeholder="e.g., Boeing 737-800, Airbus A320"
+            fullWidth
+            required
+            value={newPlaneModel}
+            onChange={(e) => setNewPlaneModel(e.target.value)}
+            helperText="Enter the aircraft model type"
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddPlane} disabled={!newPlaneModel}>
+            Add Plane
           </Button>
         </DialogActions>
       </Dialog>

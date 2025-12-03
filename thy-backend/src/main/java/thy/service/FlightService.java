@@ -142,4 +142,40 @@ public class FlightService {
         return String.format("Flight %d cancelled successfully. %d tickets were processed for refund.",
                 flightId, ticketsCancelled);
     }
+
+    // Get all flights from database
+    public List<Flight> getAllFlights() {
+        return flightRepository.findAll();
+    }
+
+    // Get flight detail by ID
+    public thy.dto.FlightDetailDTO getFlightDetail(Long flightId) {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new RuntimeException("Flight not found with ID: " + flightId));
+
+        thy.dto.FlightDetailDTO dto = new thy.dto.FlightDetailDTO();
+        dto.setFlightId(flight.getFlightId());
+        
+        if (flight.getOriginAirport() != null) {
+            dto.setOriginAirport(flight.getOriginAirport().getName() + " (" + flight.getOriginAirport().getCity() + ")");
+            dto.setOriginIata(flight.getOriginAirport().getIataCode());
+        }
+        
+        if (flight.getDestinationAirport() != null) {
+            dto.setDestinationAirport(flight.getDestinationAirport().getName() + " (" + flight.getDestinationAirport().getCity() + ")");
+            dto.setDestinationIata(flight.getDestinationAirport().getIataCode());
+        }
+        
+        dto.setDepartureTime(flight.getDepartureTime() != null ? flight.getDepartureTime().toString() : null);
+        dto.setArrivalTime(flight.getArrivalTime() != null ? flight.getArrivalTime().toString() : null);
+        
+        if (flight.getPlane() != null) {
+            dto.setPlaneInfo(flight.getPlane().getModelType() + " (ID: " + flight.getPlane().getPlaneId() + ")");
+            dto.setPlaneId(flight.getPlane().getPlaneId());
+        }
+        
+        dto.setStatus(flight.getStatus() != null ? flight.getStatus().name() : "SCHEDULED");
+        
+        return dto;
+    }
 }

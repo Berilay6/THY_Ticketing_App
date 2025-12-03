@@ -50,10 +50,26 @@ public class AirportService {
         return airportRepository.save(airport);
     }
 
-    @Transactional // Tüm adımlar tek bir işlemde gerçekleşmelidir
-    public void deleteAirport(Long airportId) {
+    /**
+     * Tüm havalimanlarını döndürür
+     */
+    public List<Airport> getAllAirports() {
+        return airportRepository.findAll();
+    }
 
-        Airport airport = airportRepository.findById(airportId)
+    /**
+     * ID ile havalimanı getirir
+     */
+    public Airport getAirportById(Long airportId) {
+        return airportRepository.findById(airportId)
+                .orElseThrow(() -> new RuntimeException("Airport not found with ID: " + airportId));
+    }
+
+    @Transactional // Tüm adımlar tek bir işlemde gerçekleşmelidir
+    public void clearAirport(Long airportId) {
+
+        // Havalimanının var olduğunu kontrol et
+        airportRepository.findById(airportId)
                 .orElseThrow(() -> new RuntimeException("Airport not found with ID: " + airportId));
 
         // --- 1. TÜM İLGİLİ UÇUŞLARI BUL VE İPTAL ET (Refund) ---
@@ -63,26 +79,30 @@ public class AirportService {
                 airportId // Aynı ID'yi hem Origin hem Dest için kullanıyoruz
         );
 
+        // Tüm uçuşları iptal et (status = CANCELLED, bilet iadesi, FlightSeat boşalt)
         for (Flight flight : relatedFlights) {
-            // FlightService.cancelFlight'ı çağır. Bu metot zaten bileti, FlightSeat'i,
-            // iadeyi ve Flight Statusunu (CANCELLED) güncellemeyi hallediyor.
             if (flight.getStatus() != Flight.FlightStatus.CANCELLED && flight.getStatus() != Flight.FlightStatus.COMPLETED) {
                 flightService.cancelFlight(flight.getFlightId());
             }
         }
 
-        // --- 2. TÜM UÇAKLARI DEPOYA ÇEK (Airport ID'sini NULL yap) ---
+        // --- 2. UÇUŞLARDA KULLANILAN UÇAKLARI DEPOYA ÇEK ---
+        // İptal edilen uçuşlardaki uçakları da Storage'a almalıyız
+        for (Flight flight : relatedFlights) {
+            Plane plane = flight.getPlane();
+            if (plane != null && plane.getAirport() != null) {
+                plane.setAirport(null); // Depoya çek (Storage)
+                planeRepository.save(plane);
+            }
+        }
 
+        // --- 3. HAVALİMANINDA PARK HALİNDEKİ DİĞER UÇAKLARI DEPOYA ÇEK ---
         List<Plane> parkedPlanes = planeRepository.findByAirportAirportId(airportId);
-
         for (Plane plane : parkedPlanes) {
             plane.setAirport(null); // Depoya çek (Storage)
             planeRepository.save(plane);
         }
 
-        // --- 3. HAVALİMANINI SİL (En Son Adım) ---
-
-        // Uçuş ve Uçak bağlantıları kesildiği için SQL kısıtlaması artık izin verecektir.
-        airportRepository.delete(airport);
+        // Airport silmiyoruz - sadece temizliyoruz
     }
 }

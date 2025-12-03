@@ -37,4 +37,14 @@ public class FlightController {
         if (seat == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(seat);
     }
+
+    @GetMapping("/{flightId}")
+    public ResponseEntity<thy.dto.FlightDetailDTO> getFlightDetail(@PathVariable Long flightId) {
+        try {
+            thy.dto.FlightDetailDTO flight = flightService.getFlightDetail(flightId);
+            return ResponseEntity.ok(flight);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

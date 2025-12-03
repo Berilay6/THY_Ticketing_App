@@ -25,6 +25,7 @@ import { CircularProgress, Alert } from "@mui/material";
 export default function PlanesPage() {
   const navigate = useNavigate();
   const [planes, setPlanes] = useState([]);
+  const [airports, setAirports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,40 +35,50 @@ export default function PlanesPage() {
   const [filterAirport, setFilterAirport] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // fetch planes from backend
+  // fetch planes and airports from backend
   useEffect(() => {
-    const fetchPlanes = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Attempting to fetch from http://localhost:8080/api/admin/planes");
-        const response = await fetch("http://localhost:8080/api/admin/planes");
-        console.log("Fetch response status:", response.status);
-        console.log("Fetch response ok:", response.ok);
-        console.log("Fetch response headers:", response.headers);
         
-        const text = await response.text();
-        console.log("Raw response text:", text);
+        // Fetch planes
+        console.log("Attempting to fetch planes from http://localhost:8080/api/admin/planes");
+        const planesResponse = await fetch("http://localhost:8080/api/admin/planes");
+        console.log("Planes fetch response status:", planesResponse.status);
         
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${text}`);
+        if (!planesResponse.ok) {
+          const text = await planesResponse.text();
+          throw new Error(`HTTP ${planesResponse.status}: ${text}`);
         }
         
-        const data = JSON.parse(text);
-        console.log("Parsed data:", data);
-        console.log("Data type:", typeof data, "Is array:", Array.isArray(data));
+        const planesData = await planesResponse.json();
+        console.log("Planes data:", planesData);
+        setPlanes(Array.isArray(planesData) ? planesData : []);
         
-        setPlanes(Array.isArray(data) ? data : []);
+        // Fetch airports
+        console.log("Attempting to fetch airports from http://localhost:8080/api/admin/airports");
+        const airportsResponse = await fetch("http://localhost:8080/api/admin/airports");
+        console.log("Airports fetch response status:", airportsResponse.status);
+        
+        if (!airportsResponse.ok) {
+          const text = await airportsResponse.text();
+          throw new Error(`HTTP ${airportsResponse.status}: ${text}`);
+        }
+        
+        const airportsData = await airportsResponse.json();
+        console.log("Airports data:", airportsData);
+        setAirports(Array.isArray(airportsData) ? airportsData : []);
+        
         setError(null);
       } catch (err) {
-        console.error("Error fetching planes:", err.message);
-        console.error("Error stack:", err.stack);
+        console.error("Error fetching data:", err.message);
         setError(err.message);
         setPlanes([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchPlanes();
+    fetchData();
   }, []);
 
   const getStatusColor = (status) => {
@@ -79,21 +90,16 @@ export default function PlanesPage() {
     }
   };
 
-  const toggleStatus = (id, currentStatus) => {
-    const newStatus = currentStatus === "active" ? "maintenance" : "active";
-    setPlanes((prev) => prev.map(p => p.planeId === id ? { ...p, status: newStatus } : p));
-  };
-
-  // Get unique airports and model types from planes data
-  const airports = useMemo(() => {
-    const uniqueAirports = [...new Set(planes.map(p => p.airportName))];
-    return uniqueAirports.sort();
-  }, [planes]);
-
+  // Get unique model types from planes data
   const modelTypes = useMemo(() => {
     const uniqueModels = [...new Set(planes.map(p => p.modelType))];
     return uniqueModels.sort();
   }, [planes]);
+
+  // Format airport names for dropdown
+  const airportOptions = useMemo(() => {
+    return airports.map(airport => `${airport.name} (${airport.iataCode})`).sort();
+  }, [airports]);
 
   const filteredPlanes = useMemo(() => {
     return planes.filter((p) => {
@@ -145,7 +151,7 @@ export default function PlanesPage() {
                 <InputLabel>Airport / Location</InputLabel>
                 <Select value={filterAirport} label="Airport / Location" onChange={(e) => setFilterAirport(e.target.value)}>
                   <MenuItem value=""><em>All</em></MenuItem>
-                  {airports.map((airport) => (
+                  {airportOptions.map((airport) => (
                     <MenuItem key={airport} value={airport}>{airport}</MenuItem>
                   ))}
                 </Select>
@@ -195,9 +201,6 @@ export default function PlanesPage() {
                     <TableCell align="right">
                       <IconButton color="primary" onClick={(e) => { e.stopPropagation(); navigate(`/admin/planes/${plane.planeId}`); }} size="small" title="View Details">
                         <Visibility fontSize="small" />
-                      </IconButton>
-                      <IconButton color="warning" onClick={(e) => { e.stopPropagation(); toggleStatus(plane.planeId, plane.status); }} size="small">
-                        <Build fontSize="small" />
                       </IconButton>
                     </TableCell>
                   </TableRow>

@@ -17,4 +17,7 @@ public interface FlightSeatRepository extends JpaRepository<FlightSeat, FlightSe
     Optional<FlightSeat> findByFlightIdAndSeatNumber(Long flightId, String seatNumber);
 
     long countByFlightIdAndAvailability(Long flightId, Availability availability);
+    
+    // Belirli uçuşa ait tüm FlightSeat'leri sil
+    void deleteByFlightId(Long flightId);
 }
