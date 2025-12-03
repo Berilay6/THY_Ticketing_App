@@ -96,9 +96,19 @@ export default function PaymentsHistoryPage() {
         payments.map((p) => (
           <Paper key={p.paymentId} elevation={0} className="card">
             <Box>
-              <Typography sx={{ fontWeight: 500, mb: 1 }}>
-                Payment • {p.method}
-              </Typography>
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ mb: 1 }}
+              >
+                <Typography sx={{ fontWeight: 500 }}>
+                  {p.status === "refunded" ? "Refund" : "Payment"} • {p.method}
+                </Typography>
+                {p.status === "refunded" && (
+                  <Chip label="Refunded" size="small" color="warning" />
+                )}
+              </Stack>
 
               {p.tickets && p.tickets.length > 0 && (
                 <Box sx={{ mb: 1 }}>
@@ -160,9 +170,18 @@ export default function PaymentsHistoryPage() {
 
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 600, color: "var(--primary)", mt: 1 }}
+                sx={{
+                  fontWeight: 600,
+                  color:
+                    p.status === "refunded" ? "var(--error)" : "var(--primary)",
+                  mt: 1,
+                }}
               >
-                Total: {calculatePaymentTotal(p)} TL
+                {p.status === "refunded" ? "Refund: " : "Total: "}
+                {p.status === "refunded" && p.totalAmount < 0
+                  ? Math.abs(calculatePaymentTotal(p))
+                  : calculatePaymentTotal(p)}{" "}
+                TL
               </Typography>
             </Box>
           </Paper>

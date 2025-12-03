@@ -53,6 +53,7 @@ public class DTOMapper {
             ticketSummaries,
             payment.getMethod().name(),
             payment.getTotalAmount(),
+            payment.getStatus() != null ? payment.getStatus().name() : "completed",
             null,
             null
         );

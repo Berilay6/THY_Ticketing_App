@@ -57,7 +57,17 @@ public class TicketService {
             ticket.getSeatNumber()
         ).orElseThrow(() -> new RuntimeException("FlightSeat not found"));
         
+        // Calculate total refund amount including base price and extra services
         BigDecimal refundAmount = flightSeat.getPrice();
+        final BigDecimal EXTRA_BAGGAGE_PRICE = new BigDecimal("150.00");
+        final BigDecimal MEAL_SERVICE_PRICE = new BigDecimal("75.00");
+        
+        if (ticket.getHasExtraBaggage()) {
+            refundAmount = refundAmount.add(EXTRA_BAGGAGE_PRICE);
+        }
+        if (ticket.getHasMealService()) {
+            refundAmount = refundAmount.add(MEAL_SERVICE_PRICE);
+        }
         
         // Mark seat as available again
         flightSeat.setAvailability(FlightSeat.Availability.available);
